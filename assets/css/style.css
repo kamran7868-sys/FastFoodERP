@@ -1215,6 +1215,12 @@ button.menu-item { font-family:var(--font); }
 ────────────────────────────────────────────────────────────────── */
 .bf-tb-right { position: relative; }
 
+.bf-tb-user-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .bf-user-dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -1226,13 +1232,15 @@ button.menu-item { font-family:var(--font); }
   box-shadow: var(--sh-lg);
   z-index: 1060;
   opacity: 0;
+  visibility: hidden;
   transform: translateY(-6px) scale(.98);
   pointer-events: none;
-  transition: opacity var(--t), transform var(--t);
+  transition: opacity var(--t), transform var(--t), visibility var(--t);
   overflow: hidden;
 }
 .bf-user-dropdown.is-open {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0) scale(1);
   pointer-events: all;
 }
@@ -1288,12 +1296,14 @@ button.menu-item { font-family:var(--font); }
   justify-content: center;
   padding-top: 80px;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--t-med);
+  transition: opacity var(--t-med), visibility var(--t-med);
   backdrop-filter: blur(2px);
 }
 .bf-search-overlay.is-open {
   opacity: 1;
+  visibility: visible;
   pointer-events: all;
 }
 
@@ -1386,12 +1396,14 @@ button.menu-item { font-family:var(--font); }
   align-items: center;
   justify-content: center;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--t-med);
+  transition: opacity var(--t-med), visibility var(--t-med);
   backdrop-filter: blur(2px);
 }
 .bf-switch-overlay.is-open {
   opacity: 1;
+  visibility: visible;
   pointer-events: all;
 }
 

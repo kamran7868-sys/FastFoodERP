@@ -225,43 +225,43 @@ function injectLayout() {
           svg('bell', 17) +
           '<span class="bf-notif-dot" aria-hidden="true"></span>' +
         '</button>' +
-        '<div class="bf-tb-user" id="bfUserBtn" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">' +
-          '<div class="bf-tb-avatar" id="bfTopAvatar">AK</div>' +
-          '<div class="bf-tb-userinfo">' +
-            '<span class="bf-tb-uname" id="bfTopName">Aamir Khan</span>' +
-            '<span class="bf-tb-urole" id="bfTopRole">Owner</span>' +
-          '</div>' +
-          '<svg class="bf-tb-ucaret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
-        '</div>' +
-        /* User dropdown */ +
-        '<div class="bf-user-dropdown" id="bfUserDropdown" role="menu" aria-hidden="true">' +
-          '<div class="bf-udp-head">' +
-            '<div class="bf-udp-avatar" id="bfDdAvatar">AK</div>' +
-            '<div>' +
-              '<div class="bf-udp-name" id="bfDdName">Aamir Khan</div>' +
-              '<div class="bf-udp-role" id="bfDdRole">Owner • BiteFlow</div>' +
+        '<div class="bf-tb-user-wrap">' +
+          '<div class="bf-tb-user" id="bfUserBtn" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">' +
+            '<div class="bf-tb-avatar" id="bfTopAvatar">AK</div>' +
+            '<div class="bf-tb-userinfo">' +
+              '<span class="bf-tb-uname" id="bfTopName">Aamir Khan</span>' +
+              '<span class="bf-tb-urole" id="bfTopRole">Owner</span>' +
             '</div>' +
+            '<svg class="bf-tb-ucaret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
           '</div>' +
-          '<div class="bf-udp-divider"></div>' +
-          '<button class="bf-udp-item" id="bfSwitchAccBtn" role="menuitem">' +
-            '<span class="bf-udp-icon">' + svg('users', 15) + '</span>' +
-            'Switch Account' +
-            '<span class="bf-udp-arrow">›</span>' +
-          '</button>' +
-          '<div class="bf-udp-divider"></div>' +
-          '<a class="bf-udp-item" href="settings-users.html" role="menuitem">' +
-            '<span class="bf-udp-icon">' + svg('settings', 15) + '</span>' +
-            'Settings' +
-          '</a>' +
-          '<div class="bf-udp-divider"></div>' +
-          '<button class="bf-udp-item bf-udp-item--danger" id="bfLogoutBtn" role="menuitem">' +
-            '<span class="bf-udp-icon">' + svg('logout', 15) + '</span>' +
-            'Sign out' +
-          '</button>' +
+          '<div class="bf-user-dropdown" id="bfUserDropdown" role="menu" aria-hidden="true">' +
+            '<div class="bf-udp-head">' +
+              '<div class="bf-udp-avatar" id="bfDdAvatar">AK</div>' +
+              '<div>' +
+                '<div class="bf-udp-name" id="bfDdName">Aamir Khan</div>' +
+                '<div class="bf-udp-role" id="bfDdRole">Owner • BiteFlow</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="bf-udp-divider"></div>' +
+            '<button class="bf-udp-item" id="bfSwitchAccBtn" role="menuitem">' +
+              '<span class="bf-udp-icon">' + svg('users', 15) + '</span>' +
+              'Switch Account' +
+              '<span class="bf-udp-arrow">›</span>' +
+            '</button>' +
+            '<div class="bf-udp-divider"></div>' +
+            '<a class="bf-udp-item" href="settings-users.html" role="menuitem">' +
+              '<span class="bf-udp-icon">' + svg('settings', 15) + '</span>' +
+              'Settings' +
+            '</a>' +
+            '<div class="bf-udp-divider"></div>' +
+            '<button class="bf-udp-item bf-udp-item--danger" id="bfLogoutBtn" role="menuitem">' +
+              '<span class="bf-udp-icon">' + svg('logout', 15) + '</span>' +
+              'Sign out' +
+            '</button>' +
+          '</div>' +
         '</div>' +
       '</div>' +
     '</header>' +
-    /* ── Search overlay ── */ +
     '<div class="bf-search-overlay" id="bfSearchOverlay" role="dialog" aria-modal="true" aria-label="Search">' +
       '<div class="bf-search-modal">' +
         '<div class="bf-search-input-wrap">' +
@@ -273,7 +273,6 @@ function injectLayout() {
         '<div class="bf-search-footer">Navigate with ↑↓ · Select with Enter · Close with Esc</div>' +
       '</div>' +
     '</div>' +
-    /* ── Switch Account Modal ── */ +
     '<div class="bf-switch-overlay" id="bfSwitchOverlay" role="dialog" aria-modal="true" aria-label="Switch Account">' +
       '<div class="bf-switch-modal">' +
         '<div class="bf-switch-header">' +
