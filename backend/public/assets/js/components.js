@@ -46,7 +46,7 @@ function svg(key, size) {
 /* ── Nav data ── */
 var NAV_STRUCTURE = [
   {
-    group: 'MAIN',
+    group: 'MAIN MENU',
     items: [
       { label: 'Dashboard', icon: 'grid', href: 'index.html' },
       { label: 'Sales',     icon: 'bag',  href: null,
@@ -134,14 +134,14 @@ function buildNav(activeFile) {
       var isOpen = childActive; // auto-open if a child is active
 
       if (!hasChildren) {
-        html += '<a class="sb-item' + (isActive ? ' is-active' : '') + '" href="' + item.href + '">' +
+        html += '<a class="sb-item' + (isActive ? ' is-active' : '') + '" href="' + item.href + '" title="' + item.label + '">' +
           '<span class="sb-item-indicator"></span>' +
           '<span class="sb-item-icon">' + svg(item.icon) + '</span>' +
           '<span class="sb-item-label">' + item.label + '</span>' +
           '</a>';
       } else {
         html += '<div class="sb-parent' + (isOpen ? ' is-open' : '') + '">' +
-          '<button class="sb-item sb-toggle" type="button" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
+          '<button class="sb-item sb-toggle" type="button" aria-expanded="' + (isOpen ? 'true' : 'false') + '" title="' + item.label + '">' +
             '<span class="sb-item-indicator"></span>' +
             '<span class="sb-item-icon">' + svg(item.icon) + '</span>' +
             '<span class="sb-item-label">' + item.label + '</span>' +
@@ -149,7 +149,7 @@ function buildNav(activeFile) {
           '</button>' +
           '<div class="sb-children" style="' + (isOpen ? '' : 'max-height:0;') + '">' +
           item.children.map(function(c) {
-            return '<a class="sb-child' + (c.href === activeFile ? ' is-active' : '') + '" href="' + c.href + '">' +
+            return '<a class="sb-child' + (c.href === activeFile ? ' is-active' : '') + '" href="' + c.href + '" title="' + c.label + '">' +
               '<span class="sb-child-dot"></span>' + c.label + '</a>';
           }).join('') +
           '</div></div>';
@@ -180,68 +180,88 @@ function injectLayout() {
   /* Read collapse state from localStorage */
   var collapsed = localStorage.getItem('bf_sb_collapsed') === '1';
 
-  /* ── Sidebar ── */
+  /* ── Background Decoration (Faint Food ERP Doodles & Curve) ── */
+  var decorHTML =
+    '<div class="bf-bg-decor" aria-hidden="true">' +
+      '<svg class="bf-decor-curve-tl" viewBox="0 0 220 120" fill="none">' +
+        '<path d="M-10 10 Q 50 80 120 40 T 210 110" stroke="#FF6B1F" stroke-width="2" fill="none"/>' +
+        '<path d="M-10 25 Q 60 95 130 55 T 220 125" stroke="#FF8A00" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>' +
+      '</svg>' +
+      '<svg class="bf-decor-corner-doodle" viewBox="0 0 64 64" fill="none" stroke="#FF6B1F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M12 28 C 12 16, 52 16, 52 28 Z"/>' +
+        '<rect x="10" y="28" width="44" height="6" rx="3" fill="none"/>' +
+        '<path d="M12 36 Q 16 42, 20 36 Q 24 42, 28 36 Q 32 42, 36 36 Q 40 42, 44 36 Q 48 42, 52 36"/>' +
+        '<path d="M12 40 C 12 48, 52 48, 52 40 Z"/>' +
+      '</svg>' +
+    '</div>';
+
+  /* ── Sidebar (240px / 72px collapsed, LIGHT warm-white #FFFFFF) ── */
   var sidebarHTML =
     '<aside class="bf-sidebar' + (collapsed ? ' is-collapsed' : '') + '" id="bfSidebar" role="navigation" aria-label="Main navigation">' +
-      '<div class="bf-sb-brand">' +
-        '<div class="bf-sb-logo" aria-hidden="true">' +
-          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' +
-        '</div>' +
-        '<span class="bf-sb-name">BiteFlow</span>' +
-        '<button class="bf-sb-collapse" id="bfCollapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar">' +
-          svg('chevsL', 16) +
-        '</button>' +
-      '</div>' +
-
       '<nav class="bf-sb-nav" id="bfNav">' +
         buildNav(activeFile) +
       '</nav>' +
-
       '<div class="bf-sb-foot">' +
-        '<div class="bf-sb-user">' +
-          '<div class="bf-sb-avatar">AK</div>' +
-          '<div class="bf-sb-user-info">' +
-            '<span class="bf-sb-user-name">Aamir Khan</span>' +
-            '<span class="bf-sb-user-role">Owner</span>' +
-          '</div>' +
-          '<button class="bf-sb-logout" id="bfSbLogoutBtn" title="Logout" aria-label="Logout">' + svg('logout', 15) + '</button>' +
+        '<div class="bf-sb-promo-card">' +
+          '<div class="bf-promo-badge">⚡ Shift Action</div>' +
+          '<div class="bf-promo-title">Today\'s Summary</div>' +
+          '<div class="bf-promo-desc">Review shift totals & reconcile cash register</div>' +
+          '<a href="reports-profit.html" class="bf-promo-btn">Daily Closing</a>' +
         '</div>' +
-        '<div class="bf-sb-version">BiteFlow v2.0</div>' +
+        '<div class="bf-sb-version">BiteFlow v2.0 • Lahore</div>' +
       '</div>' +
     '</aside>' +
     '<div class="bf-overlay" id="bfOverlay" aria-hidden="true"></div>';
 
-  /* ── Topbar ── */
+  /* ── Topbar (Full-width 64px Orange Gradient Header) ── */
   var topbarHTML =
     '<header class="bf-topbar" id="bfTopbar">' +
-      '<div class="bf-tb-left">' +
-        '<button class="bf-tb-menu" id="bfMenuBtn" aria-label="Open navigation" aria-expanded="false">' + svg('menu', 18) + '</button>' +
-        '<div class="bf-tb-title">' +
-          '<h1 class="bf-tb-page" id="pageTitle">' + pageTitle + '</h1>' +
-          '<nav class="bf-tb-crumb" aria-label="Breadcrumb">' +
-            '<span>Home</span><span class="bf-crumb-sep">/</span><span id="crumbActive">' + pageTitle + '</span>' +
-          '</nav>' +
+      '<div class="bf-hdr-left">' +
+        '<button class="bf-hdr-toggle" id="bfCollapseBtn" title="Toggle navigation (Ctrl+B)" aria-label="Toggle navigation">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>' +
+        '</button>' +
+        '<a href="index.html" class="bf-hdr-brand" title="BiteFlow Home">' +
+          '<div class="bf-hdr-logo" aria-hidden="true">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M12 4V3"/><circle cx="12" cy="3" r="1" fill="currentColor"/><path d="M4 17h16a8 8 0 0 0-16 0z"/><path d="M2 20h20"/>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="bf-hdr-title">' +
+            '<span class="bf-brand-bite">Bite</span><span class="bf-brand-flow">Flow</span>' +
+          '</div>' +
+        '</a>' +
+        '<div class="bf-branch-pill" id="bfBranchSelect" title="Current Active Branch">' +
+          '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px #4ADE80;"></span>' +
+          '<span>Gulberg Branch</span>' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
         '</div>' +
       '</div>' +
-      '<div class="bf-tb-right">' +
-        '<button class="bf-tb-search" id="bfSearchBtn" title="Search (Ctrl K)" aria-label="Open search">' +
-          svg('search', 15) +
-          '<span class="bf-search-hint">Search…</span>' +
-          '<kbd class="bf-kbd">Ctrl K</kbd>' +
+
+      '<div class="bf-hdr-center">' +
+        '<button class="bf-hdr-search" id="bfSearchBtn" title="Search pages & features (Ctrl+K)" aria-label="Search">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+          '<span class="bf-search-hint">Search pages, menu, orders…</span>' +
+          '<kbd class="bf-search-kbd">Ctrl K</kbd>' +
         '</button>' +
-        '<span class="bf-tb-date" data-today></span>' +
-        '<button class="bf-tb-icon" id="bfBellBtn" aria-label="Notifications">' +
-          svg('bell', 17) +
+      '</div>' +
+
+      '<div class="bf-hdr-right">' +
+        '<div class="bf-date-chip" title="Today">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+          '<span data-today></span>' +
+        '</div>' +
+        '<button class="bf-hdr-icon-btn" id="bfBellBtn" title="Notifications" aria-label="Notifications">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' +
           '<span class="bf-notif-dot" aria-hidden="true"></span>' +
         '</button>' +
         '<div class="bf-tb-user-wrap">' +
-          '<div class="bf-tb-user" id="bfUserBtn" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">' +
-            '<div class="bf-tb-avatar" id="bfTopAvatar">AK</div>' +
-            '<div class="bf-tb-userinfo">' +
-              '<span class="bf-tb-uname" id="bfTopName">Aamir Khan</span>' +
-              '<span class="bf-tb-urole" id="bfTopRole">Owner</span>' +
+          '<div class="bf-hdr-user" id="bfUserBtn" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">' +
+            '<div class="bf-hdr-avatar" id="bfTopAvatar">AK</div>' +
+            '<div class="bf-hdr-userinfo">' +
+              '<span class="bf-hdr-uname" id="bfTopName">Aamir Khan</span>' +
+              '<span class="bf-hdr-urole" id="bfTopRole">Owner</span>' +
             '</div>' +
-            '<svg class="bf-tb-ucaret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+            '<svg class="bf-hdr-ucaret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
           '</div>' +
           '<div class="bf-user-dropdown" id="bfUserDropdown" role="menu" aria-hidden="true">' +
             '<div class="bf-udp-head">' +
@@ -275,7 +295,7 @@ function injectLayout() {
       '<div class="bf-search-modal">' +
         '<div class="bf-search-input-wrap">' +
           '<span class="bf-search-icon">' + svg('search', 18) + '</span>' +
-          '<input type="text" class="bf-search-input" id="bfSearchInput" placeholder="Search pages, features…" autocomplete="off">' +
+          '<input type="text" class="bf-search-input" id="bfSearchInput" placeholder="Search pages, menu, ingredients…" autocomplete="off">' +
           '<button class="bf-search-esc" id="bfSearchClose" aria-label="Close search"><kbd>Esc</kbd></button>' +
         '</div>' +
         '<div class="bf-search-results" id="bfSearchResults"></div>' +
@@ -295,7 +315,7 @@ function injectLayout() {
       '</div>' +
     '</div>';
 
-  document.body.insertAdjacentHTML('afterbegin', sidebarHTML + topbarHTML);
+  document.body.insertAdjacentHTML('afterbegin', decorHTML + sidebarHTML + topbarHTML);
 
   /* ── Date stamp ── */
   document.querySelectorAll('[data-today]').forEach(function(el) { el.textContent = todayStr(); });
@@ -324,52 +344,49 @@ function injectLayout() {
     });
   });
 
-  /* ── Collapse toggle (desktop) ── */
+  /* ── Sidebar Toggle (Mobile drawer <992px, Desktop collapse >=992px) ── */
   var sidebar     = document.getElementById('bfSidebar');
   var collapseBtn = document.getElementById('bfCollapseBtn');
-  if (collapseBtn) {
-    collapseBtn.addEventListener('click', function() {
-      var c = sidebar.classList.toggle('is-collapsed');
-      localStorage.setItem('bf_sb_collapsed', c ? '1' : '0');
-      updateTopbarLeft();
-    });
-  }
-
-  function updateTopbarLeft() {
-    var topbar = document.getElementById('bfTopbar');
-    var main   = document.querySelector('.main-content');
-    if (!topbar || !main) return;
-    if (sidebar.classList.contains('is-collapsed')) {
-      topbar.style.left = 'var(--sb-w-col)';
-      main.style.marginLeft = 'var(--sb-w-col)';
-    } else {
-      topbar.style.left = '';
-      main.style.marginLeft = '';
-    }
-  }
-  /* Apply on load */
-  if (collapsed) updateTopbarLeft();
-
-  /* ── Mobile drawer ── */
-  var menuBtn = document.getElementById('bfMenuBtn');
-  var overlay = document.getElementById('bfOverlay');
+  var overlay     = document.getElementById('bfOverlay');
 
   function openDrawer() {
+    if (!sidebar || !overlay) return;
     sidebar.classList.add('is-open');
     overlay.classList.add('is-visible');
-    menuBtn.setAttribute('aria-expanded', 'true');
+    if (collapseBtn) collapseBtn.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
   }
 
   function closeDrawer() {
+    if (!sidebar || !overlay) return;
     sidebar.classList.remove('is-open');
     overlay.classList.remove('is-visible');
-    menuBtn.setAttribute('aria-expanded', 'false');
+    if (collapseBtn) collapseBtn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
   }
 
-  if (menuBtn) menuBtn.addEventListener('click', openDrawer);
+  function toggleSidebar() {
+    if (window.innerWidth < 992) {
+      if (sidebar.classList.contains('is-open')) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
+    } else {
+      var isCol = sidebar.classList.toggle('is-collapsed');
+      document.body.classList.toggle('has-collapsed-sidebar', isCol);
+      localStorage.setItem('bf_sb_collapsed', isCol ? '1' : '0');
+    }
+  }
+
+  if (collapseBtn) collapseBtn.addEventListener('click', toggleSidebar);
   if (overlay) overlay.addEventListener('click', closeDrawer);
+
+  /* Set initial collapsed state on desktop */
+  if (collapsed && window.innerWidth >= 992) {
+    sidebar.classList.add('is-collapsed');
+    document.body.classList.add('has-collapsed-sidebar');
+  }
 
   /* ── Search data — all navigable pages ── */
   var SEARCH_PAGES = [];
@@ -645,9 +662,13 @@ function injectLayout() {
       closeSwitchModal();
       closeUserDropdown();
     }
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
       e.preventDefault();
       openSearch();
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+      e.preventDefault();
+      toggleSidebar();
     }
   });
 
