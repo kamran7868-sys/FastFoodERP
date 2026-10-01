@@ -230,11 +230,6 @@ function injectLayout() {
             '<span class="bf-brand-bite">Bite</span><span class="bf-brand-flow">Flow</span>' +
           '</div>' +
         '</a>' +
-        '<div class="bf-branch-pill" id="bfBranchSelect" title="Current Active Branch">' +
-          '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px #4ADE80;"></span>' +
-          '<span>Gulberg Branch</span>' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
-        '</div>' +
       '</div>' +
 
       '<div class="bf-hdr-center">' +
