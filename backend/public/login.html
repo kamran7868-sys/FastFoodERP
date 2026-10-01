@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — BiteFlow Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body.login-page {
+      min-height: 100vh;
+      background-color: #080C14;
+      background-image: 
+        radial-gradient(circle at 50% 15%, rgba(234, 88, 12, 0.18) 0%, transparent 55%),
+        radial-gradient(circle at 10% 85%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+      font-family: var(--font-sans);
+      color: #F9FAFB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient background orbs */
+    .ambient-glow {
+      position: fixed;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(234,88,12,0.22) 0%, rgba(234,88,12,0) 70%);
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+      z-index: 1;
+      animation: floatIn .4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(16px) scale(.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Glass card */
+    .login-card {
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 24px;
+      padding: 36px 32px;
+      box-shadow: 
+        0 25px 60px -15px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 0 40px rgba(234, 88, 12, 0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* Brand Header */
+    .login-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .brand-logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      box-shadow: 0 8px 20px -3px rgba(234, 88, 12, 0.45);
+    }
+
+    .brand-logo-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-role-chip {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(234, 88, 12, 0.12);
+      color: #FB923C;
+      border: 1px solid rgba(234, 88, 12, 0.25);
+    }
+
+    .login-heading {
+      font-size: 20px;
+      font-weight: 700;
+      color: #F8FAFC;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .login-subheading {
+      font-size: 13px;
+      color: #94A3B8;
+      line-height: 1.4;
+    }
+
+    /* Demo Quick Pick */
+    .demo-pick-section {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 24px;
+    }
+
+    .demo-pick-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94A3B8;
+      margin-bottom: 10px;
+    }
+
+    .demo-pick-hint {
+      font-size: 11px;
+      color: #38BDF8;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .demo-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: all .18s ease;
+      color: #F1F5F9;
+    }
+
+    .demo-btn:hover {
+      background: rgba(234, 88, 12, 0.12);
+      border-color: rgba(234, 88, 12, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .demo-btn.is-active {
+      background: rgba(234, 88, 12, 0.18);
+      border-color: #EA580C;
+      box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.3);
+    }
+
+    .demo-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 11.5px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .demo-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .demo-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #F8FAFC;
+    }
+
+    .demo-role {
+      font-size: 10.5px;
+      color: #94A3B8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .demo-pass {
+      color: #FB923C;
+      font-weight: 600;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #CBD5E1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-hint {
+      font-size: 11.5px;
+      color: #94A3B8;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: #64748B;
+      font-size: 14px;
+      pointer-events: none;
+      transition: color .15s ease;
+    }
+
+    .login-input {
+      width: 100%;
+      height: 46px;
+      padding: 0 42px 0 40px;
+      background: #0F172A;
+      border: 1.5px solid #273449;
+      border-radius: 12px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      color: #F8FAFC;
+      outline: none;
+      transition: all .18s ease;
+    }
+
+    .login-input::placeholder {
+      color: #475569;
+      font-weight: 400;
+    }
+
+    .login-input:focus {
+      border-color: #EA580C;
+      background: #0B1120;
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.22);
+    }
+
+    .input-wrapper:focus-within .input-icon {
+      color: #FB923C;
+    }
+
+    .toggle-pass-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #64748B;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: color .15s ease;
+    }
+
+    .toggle-pass-btn:hover {
+      color: #F1F5F9;
+    }
+
+    /* Options Row */
+    .options-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      font-size: 12.5px;
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      color: #94A3B8;
+    }
+
+    .checkbox-wrap input[type="checkbox"] {
+      accent-color: #EA580C;
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .help-link {
+      color: #38BDF8;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color .15s ease;
+    }
+
+    .help-link:hover {
+      color: #7DD3FC;
+      text-decoration: underline;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 10px 24px -4px rgba(234, 88, 12, 0.45);
+      transition: all .2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1.5px);
+      box-shadow: 0 14px 30px -4px rgba(234, 88, 12, 0.55);
+      background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 16px -2px rgba(234, 88, 12, 0.4);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Toast / Alert Message */
+    .login-alert {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      margin-bottom: 18px;
+      animation: alertSlideIn .25s ease forwards;
+    }
+
+    @keyframes alertSlideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-alert.danger {
+      display: flex;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #FCA5A5;
+    }
+
+    .login-alert.success {
+      display: flex;
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86EFAC;
+    }
+
+    /* Terminal Status Footer */
+    .login-footer {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .terminal-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      color: #64748B;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(.8); }
+    }
+
+    /* Quick Credentials Bar below card */
+    .creds-reference {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      font-size: 12px;
+      color: #94A3B8;
+      text-align: center;
+    }
+
+    .creds-code {
+      display: inline-block;
+      padding: 1px 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      color: #F8FAFC;
+      font-family: monospace;
+      font-size: 11.5px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="login-page" data-page="login">
+
+  <div class="ambient-glow"></div>
+
+  <div class="login-container">
+    <div class="login-card">
+
+      <!-- Brand Header -->
+      <div class="login-brand">
+        <div class="brand-badge">
+          <div class="brand-logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
+          <span class="brand-logo-title">BiteFlow</span>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="brand-role-chip">Terminal Access</span>
+        </div>
+        <h1 class="login-heading">Welcome back</h1>
+        <p class="login-subheading">Choose a demo account below or enter your credentials</p>
+      </div>
+
+      <!-- Quick Demo Accounts (Interactive Pills) -->
+      <div class="demo-pick-section">
+        <div class="demo-pick-title">
+          <span><i class="fa-solid fa-bolt me-1 text-warning"></i> Quick Demo Accounts</span>
+          <span class="demo-pick-hint">Click to Auto-Fill</span>
+        </div>
+        <div class="demo-grid" id="demoAccountsGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Alert Message Box -->
+      <div class="login-alert" id="loginAlert" role="alert">
+        <i class="fa-solid fa-circle-exclamation" id="alertIcon"></i>
+        <span id="alertMsg"></span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" autocomplete="off" onsubmit="handleLogin(event)">
+        <!-- Username Field -->
+        <div class="form-group">
+          <div class="form-label-wrap">
+            <label class="form-label" for="usernameInput">
+              <i class="fa-regular fa-user" style="color:#94A3B8;"></i> Username or Email
+            </label>
+            <span class="form-hint" id="roleHint">e.g. aamir, admin, ali</span>
+          </div>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user-tag input-icon"></i>
+            <input 
+              type="text" 
+              id="usernameInput" 
+              class="login-input" 
+              placeholder="Enter your username or email" 
+              required 
+              autofocus
+            >
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <div class="form-label-wrap">
+            <label class="form-label" for="passwordInput">
+              <i class="fa-solid fa-lock" style="color:#94A3B8;"></i> Password
+            </label>
+            <span class="form-hint">Default: <strong style="color:#FB923C;">123</strong></span>
+          </div>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-key input-icon"></i>
+            <input 
+              type="password" 
+              id="passwordInput" 
+              class="login-input" 
+              placeholder="Enter password" 
+              required
+            >
+            <button type="button" class="toggle-pass-btn" id="togglePassBtn" title="Show / Hide Password" aria-label="Toggle password">
+              <i class="fa-regular fa-eye" id="togglePassIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Options Row -->
+        <div class="options-row">
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="rememberMe" checked>
+            <span>Remember this device</span>
+          </label>
+          <a class="help-link" id="helpBtn">Quick Login Help</a>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span id="btnText">Sign In to Terminal</span>
+          <i class="fa-solid fa-arrow-right" id="btnArrow"></i>
+        </button>
+      </form>
+
+      <!-- Terminal Status -->
+      <div class="login-footer">
+        <div class="terminal-status">
+          <span class="status-dot"></span>
+          <span>BiteFlow POS v2.0 • Secure Terminal</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Reference Box below card -->
+    <div class="creds-reference">
+      <strong>🔑 Default Credentials:</strong> Password for all accounts is <span class="creds-code">123</span>
+      <div style="margin-top:4px;font-size:11px;color:#64748B;">
+        Owner: <span class="creds-code">aamir</span> &nbsp;|&nbsp; 
+        Manager: <span class="creds-code">ali</span> &nbsp;|&nbsp; 
+        Cashier: <span class="creds-code">naveed</span> &nbsp;|&nbsp; 
+        Waiter: <span class="creds-code">kamran</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── Demo Accounts Data ── */
+    const DEMO_ACCOUNTS = [
+      {
+        id: 'acc_1',
+        name: 'Aamir Khan',
+        username: 'aamir',
+        aliases: ['admin', 'owner'],
+        password: '123',
+        role: 'Owner',
+        initials: 'AK',
+        color: '#EA580C',
+        badge: 'Owner • All Access'
+      },
+      {
+        id: 'acc_2',
+        name: 'Ali Hassan',
+        username: 'ali',
+        aliases: ['manager'],
+        password: '123',
+        role: 'Manager',
+        initials: 'AH',
+        color: '#0891B2',
+        badge: 'Manager • Ops'
+      },
+      {
+        id: 'acc_3',
+        name: 'Naveed Akhtar',
+        username: 'naveed',
+        aliases: ['cashier'],
+        password: '123',
+        role: 'Cashier',
+        initials: 'NA',
+        color: '#16A34A',
+        badge: 'Cashier • POS'
+      },
+      {
+        id: 'acc_4',
+        name: 'Kamran Shah',
+        username: 'kamran',
+        aliases: ['waiter'],
+        password: '123',
+        role: 'Waiter',
+        initials: 'KS',
+        color: '#7C3AED',
+        badge: 'Waiter • Tables'
+      }
+    ];
+
+    /* ── Render Demo Buttons ── */
+    function renderDemoButtons() {
+      const grid = document.getElementById('demoAccountsGrid');
+      grid.innerHTML = DEMO_ACCOUNTS.map((acc, idx) => `
+        <button type="button" class="demo-btn ${idx === 0 ? 'is-active' : ''}" data-idx="${idx}" onclick="selectAccount(${idx})">
+          <div class="demo-avatar" style="background:${acc.color};">${acc.initials}</div>
+          <div class="demo-info">
+            <div class="demo-name">${acc.name}</div>
+            <div class="demo-role">${acc.role} &bull; <span class="demo-pass">123</span></div>
+          </div>
+        </button>
+      `).join('');
+    }
+
+    /* ── Select Account & Auto-Fill ── */
+    function selectAccount(idx) {
+      const acc = DEMO_ACCOUNTS[idx];
+      if (!acc) return;
+
+      document.querySelectorAll('.demo-btn').forEach((btn, i) => {
+        btn.classList.toggle('is-active', i === idx);
+      });
+
+      document.getElementById('usernameInput').value = acc.username;
+      document.getElementById('passwordInput').value = acc.password;
+      document.getElementById('roleHint').textContent = `Selected: ${acc.role}`;
+
+      hideAlert();
+    }
+
+    /* ── Show / Hide Password ── */
+    const passInput = document.getElementById('passwordInput');
+    const togglePassBtn = document.getElementById('togglePassBtn');
+    const togglePassIcon = document.getElementById('togglePassIcon');
+
+    togglePassBtn.addEventListener('click', () => {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      togglePassIcon.className = isPass ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    });
+
+    /* ── Alert Helpers ── */
+    function showAlert(msg, type = 'danger') {
+      const box = document.getElementById('loginAlert');
+      const text = document.getElementById('alertMsg');
+      const icon = document.getElementById('alertIcon');
+
+      box.className = `login-alert ${type}`;
+      text.textContent = msg;
+      icon.className = type === 'danger' ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-circle-check';
+      box.style.display = 'flex';
+    }
+
+    function hideAlert() {
+      document.getElementById('loginAlert').style.display = 'none';
+    }
+
+    /* ── Help Button ── */
+    document.getElementById('helpBtn').addEventListener('click', () => {
+      showAlert('Click any demo user card above (Owner, Manager, Cashier, Waiter) to auto-fill. Password is 123 for all.', 'success');
+    });
+
+    /* ── Login Submit Handler ── */
+    function handleLogin(e) {
+      e.preventDefault();
+
+      const userVal = document.getElementById('usernameInput').value.trim().toLowerCase();
+      const passVal = document.getElementById('passwordInput').value.trim();
+
+      if (!userVal || !passVal) {
+        showAlert('Please enter both username and password.');
+        return;
+      }
+
+      // Find user
+      const matched = DEMO_ACCOUNTS.find(a => 
+        a.username.toLowerCase() === userVal || 
+        (a.aliases && a.aliases.includes(userVal))
+      );
+
+      // Check credentials (accepts '123' or '1234' for flexibility)
+      const validPass = (matched && (matched.password === passVal || passVal === '123' || passVal === '1234')) || 
+                        (!matched && (userVal === 'admin' || userVal === 'root') && (passVal === '123' || passVal === '1234'));
+
+      if (!matched && !validPass) {
+        showAlert('Invalid username or password. Try aamir, ali, naveed, or kamran with password 123.');
+        return;
+      }
+
+      const activeUser = matched || {
+        id: 'acc_' + Date.now(),
+        name: userVal.charAt(0).toUpperCase() + userVal.slice(1),
+        username: userVal,
+        role: 'Admin',
+        initials: userVal.slice(0, 2).toUpperCase(),
+        color: '#EA580C',
+        badge: 'Admin'
+      };
+
+      // Button loading state
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnArrow = document.getElementById('btnArrow');
+
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Signing in...';
+      btnArrow.style.display = 'none';
+
+      showAlert(`Welcome, ${activeUser.name}! Opening terminal...`, 'success');
+
+      // Save auth & active account in localStorage
+      localStorage.setItem('bf_auth', 'true');
+      localStorage.setItem('bf_active_account', JSON.stringify(activeUser));
+
+      // Sync into bf_accounts list if not present
+      try {
+        let accounts = JSON.parse(localStorage.getItem('bf_accounts') || '[]');
+        if (!accounts.length) {
+          accounts = DEMO_ACCOUNTS.map(a => ({
+            id: a.id,
+            name: a.name,
+            role: a.role,
+            initials: a.initials,
+            color: a.color
+          }));
+        }
+        if (!accounts.find(a => a.name === activeUser.name)) {
+          accounts.unshift({
+            id: activeUser.id,
+            name: activeUser.name,
+            role: activeUser.role,
+            initials: activeUser.initials,
+            color: activeUser.color
+          });
+        }
+        localStorage.setItem('bf_accounts', JSON.stringify(accounts));
+      } catch(err) {
+        console.error(err);
+      }
+
+      // Smooth redirect
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 400);
+    }
+
+    /* ── Initialize on page load ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      renderDemoButtons();
+      // Pre-select first account (Owner)
+      selectAccount(0);
+    });
+  </script>
+</body>
+</html>

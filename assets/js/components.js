@@ -164,6 +164,15 @@ function buildNav(activeFile) {
 /* ── Main inject ── */
 function injectLayout() {
   var page       = document.body.dataset.page || '';
+  if (page === 'login') return; // Standalone login page
+
+  /* Auth check: if logged out, redirect to login */
+  var auth = localStorage.getItem('bf_auth');
+  if (auth === 'false') {
+    location.href = 'login.html';
+    return;
+  }
+
   var activeFile = page + '.html';
   var titleMap   = buildTitleMap();
   var pageTitle  = titleMap[activeFile] || 'Dashboard';
@@ -195,7 +204,7 @@ function injectLayout() {
             '<span class="bf-sb-user-name">Aamir Khan</span>' +
             '<span class="bf-sb-user-role">Owner</span>' +
           '</div>' +
-          '<button class="bf-sb-logout" title="Logout" aria-label="Logout">' + svg('logout', 15) + '</button>' +
+          '<button class="bf-sb-logout" id="bfSbLogoutBtn" title="Logout" aria-label="Logout">' + svg('logout', 15) + '</button>' +
         '</div>' +
         '<div class="bf-sb-version">BiteFlow v2.0</div>' +
       '</div>' +
@@ -489,15 +498,18 @@ function injectLayout() {
   });
 
   /* Logout */
-  var logoutBtn = document.getElementById('bfLogoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', function() {
-      if (confirm('Sign out of BiteFlow?')) {
-        localStorage.removeItem('bf_active_account');
-        location.href = 'index.html';
-      }
-    });
+  function doLogout() {
+    if (confirm('Sign out of BiteFlow?')) {
+      localStorage.setItem('bf_auth', 'false');
+      localStorage.removeItem('bf_active_account');
+      location.href = 'login.html';
+    }
   }
+  var logoutBtn = document.getElementById('bfLogoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', doLogout);
+
+  var sbLogoutBtn = document.getElementById('bfSbLogoutBtn');
+  if (sbLogoutBtn) sbLogoutBtn.addEventListener('click', doLogout);
 
   /* ── Switch Account Modal ── */
   var switchOverlay = document.getElementById('bfSwitchOverlay');
