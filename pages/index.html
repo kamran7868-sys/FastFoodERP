@@ -12,10 +12,6 @@
 
 <main class="main-content">
 
-  <!-- KPI cards (same style as Orders page) -->
-  <div class="d-flex justify-content-end mb-2">
-    <span class="sub" id="dashClock"></span>
-  </div>
   <div class="row g-3 mb-3">
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="card kpi-card">
@@ -76,7 +72,7 @@
           <div class="d-flex align-items-center gap-3">
             <div class="legend d-none d-md-flex">
               <span><span class="dot" style="background:var(--brand)"></span>Sales</span>
-              <span><span class="dot" style="background:var(--info)"></span>Orders</span>
+              <span><span class="dot" style="background:#64748B"></span>Orders</span>
             </div>
             <div class="seg-control" role="group">
               <button type="button" class="btn active" data-range="today">Today</button>
@@ -85,7 +81,7 @@
             </div>
           </div>
         </div>
-        <div class="card-body" style="padding:14px 18px;">
+        <div class="card-body">
           <div class="bar-chart" id="salesChart"></div>
         </div>
       </div>
@@ -97,7 +93,7 @@
           <a href="reports-best.html" class="btn btn-ghost btn-sm">Report <i class="fa-solid fa-arrow-right ms-1"></i></a>
         </div>
         <div class="table-responsive">
-          <table class="table table-hover">
+          <table class="table table-hover best-selling-table">
             <thead>
               <tr>
                 <th>Item</th>
