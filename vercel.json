@@ -3,10 +3,6 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/pages/index.html"
-    },
-    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     },
@@ -16,7 +12,7 @@
     },
     {
       "source": "/:page",
-      "destination": "/pages/:page.html"
+      "destination": "/:page.html"
     }
   ]
 }
