@@ -3,836 +3,977 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In — BiteFlow Terminal</title>
+  <title>Sign In — BiteFlow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-  <link href="../assets/css/style.css" rel="stylesheet">
 
   <style>
     :root {
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --orange-primary: #FF5A1F;
+      --orange-gradient: linear-gradient(135deg, #FF5A1F 0%, #FF7E2E 100%);
+      --orange-glow: rgba(255, 90, 31, 0.35);
+      --bg-warm: #FAF6F0;
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border-input: #E2E8F0;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body.login-page {
       min-height: 100vh;
-      background-color: #080C14;
+      background-color: var(--bg-warm);
       background-image: 
-        radial-gradient(circle at 50% 15%, rgba(234, 88, 12, 0.18) 0%, transparent 55%),
-        radial-gradient(circle at 10% 85%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
-      font-family: var(--font-sans);
-      color: #F9FAFB;
+        radial-gradient(circle at 80% 20%, rgba(255, 126, 46, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 20% 80%, rgba(255, 90, 31, 0.05) 0%, transparent 45%);
+      font-family: var(--font-main);
+      color: var(--text-main);
+      position: relative;
+      overflow-x: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 32px 16px;
-      overflow-x: hidden;
-      position: relative;
+      padding: 30px 20px;
     }
 
-    /* Ambient background orbs */
-    .ambient-glow {
-      position: fixed;
-      top: -120px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 380px;
-      background: radial-gradient(circle, rgba(234,88,12,0.22) 0%, rgba(234,88,12,0) 70%);
-      filter: blur(60px);
+    /* ── Decorative Corner Shapes ── */
+    .corner-shape-tl {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 200px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .corner-shape-br {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 320px;
+      height: 220px;
       pointer-events: none;
       z-index: 0;
     }
 
-    .login-container {
-      width: 100%;
-      max-width: 460px;
-      position: relative;
+    /* ── Floating Doodle Stickers ── */
+    .doodle {
+      position: absolute;
+      pointer-events: none;
       z-index: 1;
-      animation: floatIn .4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0.85;
+      transition: transform 0.3s ease;
+    }
+    .doodle-burger {
+      top: 140px;
+      left: 5%;
+      width: 72px;
+      animation: floatSlow 5s ease-in-out infinite;
+    }
+    .doodle-fries {
+      top: 360px;
+      right: 4%;
+      width: 68px;
+      animation: floatSlow 6s ease-in-out infinite 1s;
+    }
+    .doodle-pizza {
+      bottom: 110px;
+      right: 4.5%;
+      width: 64px;
+      animation: floatSlow 5.5s ease-in-out infinite 0.5s;
+    }
+    .doodle-heart {
+      top: 290px;
+      left: 12%;
+      width: 44px;
+      animation: pulseHeart 3s ease-in-out infinite;
+    }
+    .doodle-heart-2 {
+      top: 260px;
+      left: 45%;
+      width: 32px;
+      animation: pulseHeart 4s ease-in-out infinite 1.5s;
     }
 
-    @keyframes floatIn {
-      from { opacity: 0; transform: translateY(16px) scale(.98); }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50%      { transform: translateY(-8px) rotate(2deg); }
+    }
+    @keyframes pulseHeart {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50%      { transform: scale(1.12); opacity: 1; }
+    }
+
+    /* ── Main Layout Container ── */
+    .login-wrapper {
+      width: 100%;
+      max-width: 1160px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.95fr;
+      align-items: center;
+      gap: 50px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Left Side: Brand & Food Hero ── */
+    .left-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .brand-header {
+      margin-bottom: 22px;
+    }
+
+    .brand-cloche {
+      display: inline-flex;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .cloche-svg {
+      width: 82px;
+      height: auto;
+      filter: drop-shadow(0 4px 10px rgba(255, 90, 31, 0.25));
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .brand-title-main {
+      font-size: 46px;
+      font-weight: 900;
+      color: #1E293B;
+      letter-spacing: -1.2px;
+      line-height: 1;
+    }
+
+    .brand-title-accent {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 50px;
+      font-weight: 700;
+      color: var(--orange-primary);
+      line-height: 1;
+    }
+
+    .brand-tagline {
+      font-size: 15px;
+      font-weight: 700;
+      color: #334155;
+      letter-spacing: 0.02em;
+      margin-top: 6px;
+    }
+
+    .brand-tagline span {
+      color: var(--orange-primary);
+    }
+
+    /* Food Hero Platter Image */
+    .food-platter-container {
+      position: relative;
+      width: 100%;
+      max-width: 540px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(0, 0, 0, 0.04);
+      background: #FFFFFF;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .food-platter-container:hover {
+      transform: translateY(-4px);
+      box-shadow: 
+        0 30px 60px -12px rgba(255, 90, 31, 0.25),
+        0 0 0 1px rgba(255, 90, 31, 0.15);
+    }
+
+    .food-platter-img {
+      width: 100%;
+      height: 330px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .food-platter-container:hover .food-platter-img {
+      transform: scale(1.03);
+    }
+
+    /* ── Right Side: Floating Card with Orange Blob ── */
+    .right-card-section {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Organic orange blob shape behind the card */
+    .orange-blob-backdrop {
+      position: absolute;
+      top: -16px;
+      bottom: -16px;
+      left: 10px;
+      right: 10px;
+      background: linear-gradient(135deg, #FF5A1F 0%, #FF8A00 100%);
+      border-radius: 46px 52px 42px 48px;
+      transform: rotate(-1.5deg);
+      z-index: 0;
+      box-shadow: 0 20px 40px -10px rgba(255, 90, 31, 0.4);
+      transition: transform 0.3s ease;
+    }
+
+    .right-card-section:hover .orange-blob-backdrop {
+      transform: rotate(0deg) scale(1.01);
+    }
+
+    /* Floating Card */
+    .auth-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      background: var(--card-bg);
+      border-radius: 36px;
+      padding: 40px 36px 32px;
+      box-shadow: 
+        0 25px 60px -15px rgba(0, 0, 0, 0.1),
+        0 10px 25px -5px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(18px) scale(0.98); }
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* Glass card */
-    .login-card {
-      background: rgba(15, 23, 42, 0.82);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 24px;
-      padding: 36px 32px;
-      box-shadow: 
-        0 25px 60px -15px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 0 40px rgba(234, 88, 12, 0.06);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-
-    /* Brand Header */
-    .login-brand {
+    /* Card Header */
+    .card-header-wrap {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 22px;
     }
 
-    .brand-badge {
+    .whiskers-title {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .brand-logo-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
-      display: flex;
-      align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 20px;
-      box-shadow: 0 8px 20px -3px rgba(234, 88, 12, 0.45);
-    }
-
-    .brand-logo-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.5px;
-    }
-
-    .brand-role-chip {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 3px 9px;
-      border-radius: 20px;
-      background: rgba(234, 88, 12, 0.12);
-      color: #FB923C;
-      border: 1px solid rgba(234, 88, 12, 0.25);
-    }
-
-    .login-heading {
-      font-size: 20px;
-      font-weight: 700;
-      color: #F8FAFC;
-      letter-spacing: -0.3px;
+      gap: 12px;
       margin-bottom: 6px;
     }
 
-    .login-subheading {
+    .whiskers-icon {
+      color: var(--orange-primary);
+      font-size: 14px;
+      letter-spacing: -2px;
+      font-weight: 800;
+    }
+
+    .card-heading {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.4px;
+    }
+
+    .card-subheading {
       font-size: 13px;
-      color: #94A3B8;
-      line-height: 1.4;
+      color: var(--text-muted);
+      line-height: 1.45;
+      padding: 0 10px;
     }
 
-    /* Demo Quick Pick */
-    .demo-pick-section {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 24px;
-    }
-
-    .demo-pick-title {
+    /* Quick User Select / Demo Bar */
+    .quick-users-label {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: #94A3B8;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
-    .demo-pick-hint {
-      font-size: 11px;
-      color: #38BDF8;
+    .quick-users-label span.badge-pill {
+      font-size: 10px;
       font-weight: 600;
+      background: rgba(255, 90, 31, 0.1);
+      color: var(--orange-primary);
+      padding: 2px 7px;
+      border-radius: 12px;
       text-transform: none;
-      letter-spacing: normal;
     }
 
-    .demo-grid {
+    .quick-users-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
     }
 
-    .demo-btn {
+    .user-chip-btn {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
+      padding: 8px 4px;
+      background: #F8FAFC;
+      border: 1.5px solid #EDF2F7;
+      border-radius: 14px;
       cursor: pointer;
-      text-align: left;
-      transition: all .18s ease;
-      color: #F1F5F9;
+      transition: all 0.2s ease;
+      color: var(--text-main);
+      text-align: center;
     }
 
-    .demo-btn:hover {
-      background: rgba(234, 88, 12, 0.12);
-      border-color: rgba(234, 88, 12, 0.35);
-      transform: translateY(-1px);
+    .user-chip-btn:hover {
+      background: #FFF5F0;
+      border-color: #FED7AA;
+      transform: translateY(-2px);
     }
 
-    .demo-btn.is-active {
-      background: rgba(234, 88, 12, 0.18);
-      border-color: #EA580C;
-      box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.3);
+    .user-chip-btn.is-active {
+      background: #FFF0E8;
+      border-color: var(--orange-primary);
+      box-shadow: 0 4px 12px -2px rgba(255, 90, 31, 0.3);
     }
 
-    .demo-avatar {
+    .chip-avatar {
       width: 32px;
       height: 32px;
-      border-radius: 8px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 11.5px;
+      font-weight: 800;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    .chip-name {
+      font-size: 11px;
       font-weight: 700;
-      font-size: 11.5px;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .demo-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .demo-name {
-      font-size: 12.5px;
-      font-weight: 600;
+      line-height: 1.1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #F8FAFC;
+      max-width: 100%;
     }
 
-    .demo-role {
-      font-size: 10.5px;
-      color: #94A3B8;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+    .chip-role {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
 
-    .demo-pass {
-      color: #FB923C;
-      font-weight: 600;
+    /* ── Pill Input Fields ── */
+    .field-wrap {
+      margin-bottom: 14px;
     }
 
-    /* Form Fields */
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    .form-label-wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 7px;
-    }
-
-    .form-label {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #CBD5E1;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .form-hint {
-      font-size: 11.5px;
-      color: #94A3B8;
-    }
-
-    .input-wrapper {
+    .pill-input-container {
       position: relative;
       display: flex;
       align-items: center;
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-input);
+      border-radius: 50px;
+      height: 52px;
+      padding: 0 16px 0 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
     }
 
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      color: #64748B;
-      font-size: 14px;
-      pointer-events: none;
-      transition: color .15s ease;
+    .pill-input-container:focus-within {
+      border-color: var(--orange-primary);
+      box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.15);
     }
 
-    .login-input {
-      width: 100%;
-      height: 46px;
-      padding: 0 42px 0 40px;
-      background: #0F172A;
-      border: 1.5px solid #273449;
-      border-radius: 12px;
-      font-family: var(--font-sans);
-      font-size: 14px;
-      font-weight: 500;
-      color: #F8FAFC;
+    .pill-icon-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--orange-primary);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13.5px;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(255, 90, 31, 0.3);
+    }
+
+    .pill-input {
+      flex: 1;
+      border: none;
       outline: none;
-      transition: all .18s ease;
+      background: transparent;
+      padding: 0 12px;
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
     }
 
-    .login-input::placeholder {
-      color: #475569;
+    .pill-input::placeholder {
+      color: #94A3B8;
       font-weight: 400;
     }
 
-    .login-input:focus {
-      border-color: #EA580C;
-      background: #0B1120;
-      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.22);
-    }
-
-    .input-wrapper:focus-within .input-icon {
-      color: #FB923C;
-    }
-
-    .toggle-pass-btn {
-      position: absolute;
-      right: 12px;
+    .eye-toggle-btn {
       background: none;
       border: none;
-      color: #64748B;
-      font-size: 14px;
+      color: #94A3B8;
+      font-size: 15px;
       cursor: pointer;
       padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
-      transition: color .15s ease;
+      transition: color 0.15s ease;
     }
 
-    .toggle-pass-btn:hover {
-      color: #F1F5F9;
+    .eye-toggle-btn:hover {
+      color: var(--text-main);
     }
 
-    /* Options Row */
-    .options-row {
+    /* ── Action Button ── */
+    .submit-row {
+      margin-top: 22px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 22px;
-      font-size: 12.5px;
+      justify-content: center;
     }
 
-    .checkbox-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      user-select: none;
-      color: #94A3B8;
-    }
-
-    .checkbox-wrap input[type="checkbox"] {
-      accent-color: #EA580C;
-      width: 15px;
-      height: 15px;
-      cursor: pointer;
-    }
-
-    .help-link {
-      color: #38BDF8;
-      text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: color .15s ease;
-    }
-
-    .help-link:hover {
-      color: #7DD3FC;
-      text-decoration: underline;
-    }
-
-    /* Submit Button */
-    .submit-btn {
-      width: 100%;
-      height: 48px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
-      color: #fff;
-      font-family: var(--font-sans);
-      font-size: 14.5px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      display: flex;
+    .pill-submit-btn {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      box-shadow: 0 10px 24px -4px rgba(234, 88, 12, 0.45);
-      transition: all .2s ease;
-      position: relative;
-      overflow: hidden;
+      gap: 10px;
+      height: 48px;
+      padding: 0 44px;
+      border: none;
+      border-radius: 50px;
+      background: var(--orange-gradient);
+      color: #FFFFFF;
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 10px 25px -4px rgba(255, 90, 31, 0.45);
+      transition: all 0.2s ease;
     }
 
-    .submit-btn:hover {
-      transform: translateY(-1.5px);
-      box-shadow: 0 14px 30px -4px rgba(234, 88, 12, 0.55);
-      background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+    .pill-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px -4px rgba(255, 90, 31, 0.6);
+      filter: brightness(1.05);
     }
 
-    .submit-btn:active {
+    .pill-submit-btn:active {
       transform: translateY(0);
-      box-shadow: 0 6px 16px -2px rgba(234, 88, 12, 0.4);
+      box-shadow: 0 6px 16px -2px rgba(255, 90, 31, 0.4);
     }
 
-    .submit-btn:disabled {
-      opacity: 0.7;
+    .pill-submit-btn:disabled {
+      opacity: 0.75;
       cursor: not-allowed;
       transform: none;
     }
 
-    /* Toast / Alert Message */
-    .login-alert {
+    /* ── Divider with Chef Hat ── */
+    .chef-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: #E2E8F0;
+    }
+
+    .chef-hat-icon {
+      color: var(--orange-primary);
+      font-size: 20px;
+    }
+
+    /* ── Alert Notification ── */
+    .alert-banner {
       display: none;
       align-items: center;
       gap: 10px;
       padding: 10px 14px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 12.5px;
-      font-weight: 500;
-      margin-bottom: 18px;
-      animation: alertSlideIn .25s ease forwards;
+      font-weight: 600;
+      margin-bottom: 16px;
+      animation: alertSlide 0.25s ease forwards;
     }
 
-    @keyframes alertSlideIn {
+    @keyframes alertSlide {
       from { opacity: 0; transform: translateY(-6px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .login-alert.danger {
+    .alert-banner.danger {
       display: flex;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #FCA5A5;
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+      color: #DC2626;
     }
 
-    .login-alert.success {
+    .alert-banner.success {
       display: flex;
-      background: rgba(34, 197, 94, 0.15);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      color: #86EFAC;
+      background: #F0FDF4;
+      border: 1px solid #86EFAC;
+      color: #16A34A;
     }
 
-    /* Terminal Status Footer */
-    .login-footer {
-      margin-top: 24px;
+    .footer-help-text {
       text-align: center;
-    }
-
-    .terminal-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
+      margin-top: 14px;
       font-size: 11.5px;
-      color: #64748B;
-      padding: 5px 12px;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #10B981;
-      box-shadow: 0 0 8px #10B981;
-      animation: pulseDot 2s infinite ease-in-out;
-    }
-
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: 0.4; transform: scale(.8); }
-    }
-
-    /* Quick Credentials Bar below card */
-    .creds-reference {
-      margin-top: 20px;
-      padding: 12px 16px;
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 14px;
-      font-size: 12px;
       color: #94A3B8;
-      text-align: center;
     }
 
-    .creds-code {
-      display: inline-block;
-      padding: 1px 6px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
-      color: #F8FAFC;
-      font-family: monospace;
-      font-size: 11.5px;
+    .footer-help-text strong {
+      color: var(--orange-primary);
     }
 
     .spinner {
       display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,.3);
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
       border-radius: 50%;
       border-top-color: #fff;
       animation: spin 0.6s linear infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive Stacking ── */
+    @media (max-width: 991.98px) {
+      .login-wrapper {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+        gap: 36px;
+      }
+      .food-platter-container {
+        max-width: 440px;
+        height: auto;
+      }
+      .food-platter-img {
+        height: 240px;
+      }
+      .doodle {
+        display: none;
+      }
     }
   </style>
 </head>
 <body class="login-page" data-page="login">
 
-  <div class="ambient-glow"></div>
+  <!-- ── Top-Left Orange Wave with Dotted Line ── -->
+  <svg class="corner-shape-tl" viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M-20 -20 Q 80 80, 160 30 T 260 70 L 260 -20 Z" fill="#FF5A1F" opacity="0.95"/>
+    <path d="M-20 0 Q 75 100, 165 48 T 270 90" stroke="#FF8A00" stroke-width="2.5" stroke-dasharray="6 6" fill="none" opacity="0.6"/>
+  </svg>
 
-  <div class="login-container">
-    <div class="login-card">
+  <!-- ── Bottom-Right Peach Wave ── -->
+  <svg class="corner-shape-br" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M40 220 Q 120 130, 200 170 T 340 120 L 340 240 Z" fill="#FFA666" opacity="0.25"/>
+    <path d="M10 220 Q 100 110, 200 150 T 340 100" stroke="#FF5A1F" stroke-width="2" fill="none" opacity="0.35"/>
+  </svg>
 
+  <!-- ── Doodle Stickers (Matching the Reference Image) ── -->
+  <!-- Burger Doodle (Top-Left) -->
+  <svg class="doodle doodle-burger" viewBox="0 0 64 64" fill="none" stroke="#FF5A1F" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 28 C 12 16, 52 16, 52 28 Z"/>
+    <line x1="8" y1="34" x2="56" y2="34"/>
+    <path d="M12 40 Q 16 46, 20 40 Q 24 46, 28 40 Q 32 46, 36 40 Q 40 46, 44 40 Q 48 46, 52 40"/>
+    <path d="M12 44 C 12 52, 52 52, 52 44 Z"/>
+    <circle cx="24" cy="22" r="1" fill="#FF5A1F"/>
+    <circle cx="32" cy="20" r="1" fill="#FF5A1F"/>
+    <circle cx="40" cy="23" r="1" fill="#FF5A1F"/>
+  </svg>
+
+  <!-- French Fries Doodle (Right) -->
+  <svg class="doodle doodle-fries" viewBox="0 0 64 64" fill="none" stroke="#FF5A1F" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 28 L 20 54 L 44 54 L 48 28 Z"/>
+    <line x1="22" y1="28" x2="22" y2="12"/>
+    <line x1="28" y1="28" x2="27" y2="8"/>
+    <line x1="34" y1="28" x2="35" y2="10"/>
+    <line x1="40" y1="28" x2="42" y2="14"/>
+    <line x1="16" y1="28" x2="48" y2="28"/>
+    <rect x="26" y="36" width="12" height="10" rx="2" stroke="#FF5A1F"/>
+  </svg>
+
+  <!-- Pizza Slice Doodle (Bottom-Right) -->
+  <svg class="doodle doodle-pizza" viewBox="0 0 64 64" fill="none" stroke="#FF5A1F" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 10 L 12 50 A 28 28 0 0 0 52 50 Z"/>
+    <circle cx="28" cy="34" r="2.5" fill="#FF5A1F"/>
+    <circle cx="36" cy="42" r="2" fill="#FF5A1F"/>
+    <circle cx="36" cy="26" r="2" fill="#FF5A1F"/>
+  </svg>
+
+  <!-- Dotted Trail Heart Doodle -->
+  <svg class="doodle doodle-heart" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M24 38 C 12 28, 8 18, 14 12 C 18 8, 22 10, 24 14 C 26 10, 30 8, 34 12 C 40 18, 36 28, 24 38 Z" stroke="#FF5A1F" stroke-width="2" fill="none"/>
+    <path d="M12 36 Q 4 42, 6 46" stroke="#FF8A00" stroke-width="1.5" stroke-dasharray="3 3"/>
+  </svg>
+
+  <svg class="doodle doodle-heart-2" viewBox="0 0 32 32" fill="none">
+    <path d="M16 26 C 8 20, 5 13, 9 9 C 12 6, 15 8, 16 10 C 17 8, 20 6, 23 9 C 27 13, 24 20, 16 26 Z" stroke="#FF5A1F" stroke-width="1.75" fill="none"/>
+  </svg>
+
+  <!-- ── Main Grid Wrapper ── -->
+  <div class="login-wrapper">
+
+    <!-- ── Left Column: Brand Cloche & Food Platter ── -->
+    <div class="left-hero">
+      
       <!-- Brand Header -->
-      <div class="login-brand">
-        <div class="brand-badge">
-          <div class="brand-logo-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-          </div>
-          <span class="brand-logo-title">BiteFlow</span>
+      <div class="brand-header">
+        <div class="brand-cloche">
+          <!-- Chef Hat on Cloche Logo SVG -->
+          <svg class="cloche-svg" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Orange rays -->
+            <line x1="20" y1="16" x2="14" y2="12" stroke="#FF5A1F" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="70" y1="16" x2="76" y2="12" stroke="#FF5A1F" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="45" y1="6" x2="45" y2="2" stroke="#FF5A1F" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Chef Hat on Top -->
+            <path d="M38 18 C 36 10, 42 6, 45 6 C 48 6, 54 10, 52 18" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round" fill="#FFFFFF"/>
+            <path d="M34 18 C 30 14, 34 8, 39 10" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M56 18 C 60 14, 56 8, 51 10" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
+            <rect x="36" y="18" width="18" height="4" rx="2" fill="#1E293B"/>
+            <!-- Food Cloche Cover in Vibrant Orange -->
+            <circle cx="45" cy="24" r="3.5" fill="#FF5A1F"/>
+            <path d="M16 52 C 16 32, 74 32, 74 52 Z" fill="#FF5A1F"/>
+            <path d="M12 52 L 78 52 C 80 52, 80 56, 78 56 L 12 56 C 10 56, 10 52, 12 52 Z" fill="#FF7E2E"/>
+          </svg>
         </div>
-        <div style="margin-bottom:12px;">
-          <span class="brand-role-chip">Terminal Access</span>
+
+        <div class="brand-title-wrap">
+          <span class="brand-title-main">Bite</span>
+          <span class="brand-title-accent">Flow</span>
         </div>
-        <h1 class="login-heading">Welcome back</h1>
-        <p class="login-subheading">Choose a demo account below or enter your credentials</p>
+        <div class="brand-tagline">
+          Good Food, <span>Good Mood!</span>
+        </div>
       </div>
 
-      <!-- Quick Demo Accounts (Interactive Pills) -->
-      <div class="demo-pick-section">
-        <div class="demo-pick-title">
-          <span><i class="fa-solid fa-bolt me-1 text-warning"></i> Quick Demo Accounts</span>
-          <span class="demo-pick-hint">Click to Auto-Fill</span>
-        </div>
-        <div class="demo-grid" id="demoAccountsGrid">
-          <!-- Populated by JS -->
-        </div>
+      <!-- Food Platter Image -->
+      <div class="food-platter-container">
+        <img src="../assets/img/login_food_hero.jpg" alt="Delicious Gourmet Feast" class="food-platter-img" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800&auto=format&fit=crop'">
       </div>
 
-      <!-- Alert Message Box -->
-      <div class="login-alert" id="loginAlert" role="alert">
-        <i class="fa-solid fa-circle-exclamation" id="alertIcon"></i>
-        <span id="alertMsg"></span>
-      </div>
+    </div>
 
-      <!-- Login Form -->
-      <form id="loginForm" autocomplete="off" onsubmit="handleLogin(event)">
-        <!-- Username Field -->
-        <div class="form-group">
-          <div class="form-label-wrap">
-            <label class="form-label" for="usernameInput">
-              <i class="fa-regular fa-user" style="color:#94A3B8;"></i> Username or Email
-            </label>
-            <span class="form-hint" id="roleHint">e.g. aamir, admin, ali</span>
+    <!-- ── Right Column: Floating Auth Card with Orange Blob ── -->
+    <div class="right-card-section">
+      
+      <!-- Orange Blob Backdrop (Matching Reference) -->
+      <div class="orange-blob-backdrop"></div>
+
+      <!-- Main White Auth Card -->
+      <div class="auth-card">
+
+        <!-- Card Title with Whisker Rays -->
+        <div class="card-header-wrap">
+          <div class="whiskers-title">
+            <span class="whiskers-icon">&#9585; &#124; &#9586;</span>
+            <h2 class="card-heading">Sign In to Your Account</h2>
+            <span class="whiskers-icon">&#9585; &#124; &#9586;</span>
           </div>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-user-tag input-icon"></i>
-            <input 
-              type="text" 
-              id="usernameInput" 
-              class="login-input" 
-              placeholder="Enter your username or email" 
-              required 
-              autofocus
-            >
-          </div>
+          <p class="card-subheading">Select your staff account or enter your username &amp; password</p>
         </div>
 
-        <!-- Password Field -->
-        <div class="form-group">
-          <div class="form-label-wrap">
-            <label class="form-label" for="passwordInput">
-              <i class="fa-solid fa-lock" style="color:#94A3B8;"></i> Password
-            </label>
-            <span class="form-hint">Default: <strong style="color:#FB923C;">123</strong></span>
+        <!-- Quick One-Click Users Bar (All Passwords: 12345678) -->
+        <div class="quick-users-label">
+          <span><i class="fa-solid fa-users me-1 text-warning"></i> Quick Staff Profiles</span>
+          <span class="badge-pill">Pass: 12345678</span>
+        </div>
+        <div class="quick-users-grid" id="quickUsersGrid">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Alert Notification -->
+        <div class="alert-banner" id="loginAlert" role="alert">
+          <i class="fa-solid fa-circle-exclamation" id="alertIcon"></i>
+          <span id="alertMsg"></span>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)" autocomplete="off">
+          
+          <!-- Full Name / Username Field -->
+          <div class="field-wrap">
+            <div class="pill-input-container">
+              <div class="pill-icon-circle">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <input 
+                type="text" 
+                id="usernameInput" 
+                class="pill-input" 
+                placeholder="Full Name (e.g. Aamir Khan)" 
+                required 
+                autofocus
+              >
+            </div>
           </div>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-key input-icon"></i>
-            <input 
-              type="password" 
-              id="passwordInput" 
-              class="login-input" 
-              placeholder="Enter password" 
-              required
-            >
-            <button type="button" class="toggle-pass-btn" id="togglePassBtn" title="Show / Hide Password" aria-label="Toggle password">
-              <i class="fa-regular fa-eye" id="togglePassIcon"></i>
+
+          <!-- Password Field -->
+          <div class="field-wrap">
+            <div class="pill-input-container">
+              <div class="pill-icon-circle">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <input 
+                type="password" 
+                id="passwordInput" 
+                class="pill-input" 
+                placeholder="Password (12345678)" 
+                required
+              >
+              <button type="button" class="eye-toggle-btn" id="eyeToggleBtn" title="Toggle password visibility" aria-label="Toggle password visibility">
+                <i class="fa-regular fa-eye" id="eyeIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="submit-row">
+            <button type="submit" class="pill-submit-btn" id="submitBtn">
+              <span id="submitBtnText">SIGN IN &nbsp;&rarr;</span>
             </button>
           </div>
+        </form>
+
+        <!-- Divider with Chef Hat Icon (Matching Reference) -->
+        <div class="chef-divider">
+          <div class="divider-line"></div>
+          <div class="chef-hat-icon">
+            <i class="fa-solid fa-kitchen-set"></i>
+          </div>
+          <div class="divider-line"></div>
         </div>
 
-        <!-- Options Row -->
-        <div class="options-row">
-          <label class="checkbox-wrap">
-            <input type="checkbox" id="rememberMe" checked>
-            <span>Remember this device</span>
-          </label>
-          <a class="help-link" id="helpBtn">Quick Login Help</a>
+        <!-- Footer Credentials Reference -->
+        <div class="footer-help-text">
+          Password for all users is <strong>12345678</strong>
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit" class="submit-btn" id="submitBtn">
-          <span id="btnText">Sign In to Terminal</span>
-          <i class="fa-solid fa-arrow-right" id="btnArrow"></i>
-        </button>
-      </form>
-
-      <!-- Terminal Status -->
-      <div class="login-footer">
-        <div class="terminal-status">
-          <span class="status-dot"></span>
-          <span>BiteFlow POS v2.0 • Secure Terminal</span>
-        </div>
       </div>
 
     </div>
 
-    <!-- Quick Reference Box below card -->
-    <div class="creds-reference">
-      <strong>🔑 Default Credentials:</strong> Password for all accounts is <span class="creds-code">123</span>
-      <div style="margin-top:4px;font-size:11px;color:#64748B;">
-        Owner: <span class="creds-code">aamir</span> &nbsp;|&nbsp; 
-        Manager: <span class="creds-code">ali</span> &nbsp;|&nbsp; 
-        Cashier: <span class="creds-code">naveed</span> &nbsp;|&nbsp; 
-        Waiter: <span class="creds-code">kamran</span>
-      </div>
-    </div>
   </div>
 
+  <!-- ── Scripts ── -->
   <script>
-    /* ── Demo Accounts Data ── */
-    const DEMO_ACCOUNTS = [
+    /* ── Users Database (Username = User's Name, Password = 12345678) ── */
+    const STAFF_USERS = [
       {
-        id: 'acc_1',
+        id: 1,
         name: 'Aamir Khan',
-        username: 'aamir',
-        aliases: ['admin', 'owner'],
-        password: '123',
+        username: 'Aamir Khan',
+        aliases: ['aamir', 'admin', 'owner'],
+        password: '12345678',
         role: 'Owner',
         initials: 'AK',
-        color: '#EA580C',
-        badge: 'Owner • All Access'
+        color: '#FF5A1F'
       },
       {
-        id: 'acc_2',
+        id: 2,
         name: 'Ali Hassan',
-        username: 'ali',
-        aliases: ['manager'],
-        password: '123',
+        username: 'Ali Hassan',
+        aliases: ['ali', 'manager'],
+        password: '12345678',
         role: 'Manager',
         initials: 'AH',
-        color: '#0891B2',
-        badge: 'Manager • Ops'
+        color: '#0891B2'
       },
       {
-        id: 'acc_3',
+        id: 3,
         name: 'Naveed Akhtar',
-        username: 'naveed',
-        aliases: ['cashier'],
-        password: '123',
+        username: 'Naveed Akhtar',
+        aliases: ['naveed', 'cashier'],
+        password: '12345678',
         role: 'Cashier',
         initials: 'NA',
-        color: '#16A34A',
-        badge: 'Cashier • POS'
+        color: '#16A34A'
       },
       {
-        id: 'acc_4',
+        id: 4,
         name: 'Kamran Shah',
-        username: 'kamran',
-        aliases: ['waiter'],
-        password: '123',
+        username: 'Kamran Shah',
+        aliases: ['kamran', 'waiter'],
+        password: '12345678',
         role: 'Waiter',
         initials: 'KS',
-        color: '#7C3AED',
-        badge: 'Waiter • Tables'
+        color: '#7C3AED'
       }
     ];
 
-    /* ── Render Demo Buttons ── */
-    function renderDemoButtons() {
-      const grid = document.getElementById('demoAccountsGrid');
-      grid.innerHTML = DEMO_ACCOUNTS.map((acc, idx) => `
-        <button type="button" class="demo-btn ${idx === 0 ? 'is-active' : ''}" data-idx="${idx}" onclick="selectAccount(${idx})">
-          <div class="demo-avatar" style="background:${acc.color};">${acc.initials}</div>
-          <div class="demo-info">
-            <div class="demo-name">${acc.name}</div>
-            <div class="demo-role">${acc.role} &bull; <span class="demo-pass">123</span></div>
-          </div>
+    /* ── Render Quick Staff Chips ── */
+    function renderStaffChips() {
+      const container = document.getElementById('quickUsersGrid');
+      container.innerHTML = STAFF_USERS.map((user, idx) => `
+        <button type="button" class="user-chip-btn ${idx === 0 ? 'is-active' : ''}" data-idx="${idx}" onclick="pickUser(${idx})">
+          <div class="chip-avatar" style="background:${user.color};">${user.initials}</div>
+          <div class="chip-name">${user.name.split(' ')[0]}</div>
+          <div class="chip-role">${user.role}</div>
         </button>
       `).join('');
     }
 
-    /* ── Select Account & Auto-Fill ── */
-    function selectAccount(idx) {
-      const acc = DEMO_ACCOUNTS[idx];
-      if (!acc) return;
+    /* ── Pick User & Auto-Fill Name & Password ── */
+    function pickUser(idx) {
+      const user = STAFF_USERS[idx];
+      if (!user) return;
 
-      document.querySelectorAll('.demo-btn').forEach((btn, i) => {
+      document.querySelectorAll('.user-chip-btn').forEach((btn, i) => {
         btn.classList.toggle('is-active', i === idx);
       });
 
-      document.getElementById('usernameInput').value = acc.username;
-      document.getElementById('passwordInput').value = acc.password;
-      document.getElementById('roleHint').textContent = `Selected: ${acc.role}`;
-
+      document.getElementById('usernameInput').value = user.name;
+      document.getElementById('passwordInput').value = '12345678';
       hideAlert();
     }
 
-    /* ── Show / Hide Password ── */
-    const passInput = document.getElementById('passwordInput');
-    const togglePassBtn = document.getElementById('togglePassBtn');
-    const togglePassIcon = document.getElementById('togglePassIcon');
+    /* ── Password Eye Toggle ── */
+    const passwordInput = document.getElementById('passwordInput');
+    const eyeToggleBtn = document.getElementById('eyeToggleBtn');
+    const eyeIcon = document.getElementById('eyeIcon');
 
-    togglePassBtn.addEventListener('click', () => {
-      const isPass = passInput.type === 'password';
-      passInput.type = isPass ? 'text' : 'password';
-      togglePassIcon.className = isPass ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    eyeToggleBtn.addEventListener('click', () => {
+      const isPass = passwordInput.type === 'password';
+      passwordInput.type = isPass ? 'text' : 'password';
+      eyeIcon.className = isPass ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
     });
 
-    /* ── Alert Helpers ── */
+    /* ── Alert Notification Helpers ── */
     function showAlert(msg, type = 'danger') {
-      const box = document.getElementById('loginAlert');
+      const banner = document.getElementById('loginAlert');
       const text = document.getElementById('alertMsg');
       const icon = document.getElementById('alertIcon');
 
-      box.className = `login-alert ${type}`;
+      banner.className = `alert-banner ${type}`;
       text.textContent = msg;
       icon.className = type === 'danger' ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-circle-check';
-      box.style.display = 'flex';
+      banner.style.display = 'flex';
     }
 
     function hideAlert() {
       document.getElementById('loginAlert').style.display = 'none';
     }
 
-    /* ── Help Button ── */
-    document.getElementById('helpBtn').addEventListener('click', () => {
-      showAlert('Click any demo user card above (Owner, Manager, Cashier, Waiter) to auto-fill. Password is 123 for all.', 'success');
-    });
-
-    /* ── Login Submit Handler ── */
-    function handleLogin(e) {
+    /* ── Handle Login Form Submit ── */
+    async function handleLoginSubmit(e) {
       e.preventDefault();
 
-      const userVal = document.getElementById('usernameInput').value.trim().toLowerCase();
+      const userVal = document.getElementById('usernameInput').value.trim();
       const passVal = document.getElementById('passwordInput').value.trim();
 
       if (!userVal || !passVal) {
-        showAlert('Please enter both username and password.');
+        showAlert('Please enter both name and password.');
         return;
       }
 
-      // Find user
-      const matched = DEMO_ACCOUNTS.find(a => 
-        a.username.toLowerCase() === userVal || 
-        (a.aliases && a.aliases.includes(userVal))
-      );
-
-      // Check credentials (accepts '123' or '1234' for flexibility)
-      const validPass = (matched && (matched.password === passVal || passVal === '123' || passVal === '1234')) || 
-                        (!matched && (userVal === 'admin' || userVal === 'root') && (passVal === '123' || passVal === '1234'));
-
-      if (!matched && !validPass) {
-        showAlert('Invalid username or password. Try aamir, ali, naveed, or kamran with password 123.');
-        return;
-      }
-
-      const activeUser = matched || {
-        id: 'acc_' + Date.now(),
-        name: userVal.charAt(0).toUpperCase() + userVal.slice(1),
-        username: userVal,
-        role: 'Admin',
-        initials: userVal.slice(0, 2).toUpperCase(),
-        color: '#EA580C',
-        badge: 'Admin'
-      };
-
-      // Button loading state
       const btn = document.getElementById('submitBtn');
-      const btnText = document.getElementById('btnText');
-      const btnArrow = document.getElementById('btnArrow');
+      const btnText = document.getElementById('submitBtnText');
 
       btn.disabled = true;
-      btnText.innerHTML = '<span class="spinner"></span> Signing in...';
-      btnArrow.style.display = 'none';
+      btnText.innerHTML = '<span class="spinner"></span> &nbsp; SIGNING IN...';
 
-      showAlert(`Welcome, ${activeUser.name}! Opening terminal...`, 'success');
-
-      // Save auth & active account in localStorage
-      localStorage.setItem('bf_auth', 'true');
-      localStorage.setItem('bf_active_account', JSON.stringify(activeUser));
-
-      // Sync into bf_accounts list if not present
+      // First try backend API endpoint /api/login
+      let matchedUser = null;
       try {
-        let accounts = JSON.parse(localStorage.getItem('bf_accounts') || '[]');
-        if (!accounts.length) {
-          accounts = DEMO_ACCOUNTS.map(a => ({
-            id: a.id,
-            name: a.name,
-            role: a.role,
-            initials: a.initials,
-            color: a.color
-          }));
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ username: userVal, password: passVal })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            matchedUser = data.user;
+          }
         }
-        if (!accounts.find(a => a.name === activeUser.name)) {
-          accounts.unshift({
-            id: activeUser.id,
-            name: activeUser.name,
-            role: activeUser.role,
-            initials: activeUser.initials,
-            color: activeUser.color
-          });
-        }
-        localStorage.setItem('bf_accounts', JSON.stringify(accounts));
-      } catch(err) {
-        console.error(err);
+      } catch (err) {
+        console.warn('Backend API offline or unreachable, using local validation', err);
       }
 
-      // Smooth redirect
+      // Client-side fallback check
+      if (!matchedUser) {
+        const uLower = userVal.toLowerCase();
+        matchedUser = STAFF_USERS.find(u => 
+          u.name.toLowerCase() === uLower ||
+          u.username.toLowerCase() === uLower ||
+          (u.aliases && u.aliases.includes(uLower))
+        );
+
+        const isPassOk = (passVal === '12345678' || passVal === '123');
+
+        if (!matchedUser || !isPassOk) {
+          btn.disabled = false;
+          btnText.innerHTML = 'SIGN IN &nbsp;&rarr;';
+          showAlert('Invalid credentials! Username is the user name (e.g. Aamir Khan) and password is 12345678.');
+          return;
+        }
+      }
+
+      // Success
+      showAlert(`Welcome, ${matchedUser.name}! Logging in...`, 'success');
+
+      // Set auth in localStorage
+      localStorage.setItem('bf_auth', 'true');
+      localStorage.setItem('bf_active_account', JSON.stringify({
+        id: matchedUser.id || 'acc_' + Date.now(),
+        name: matchedUser.name,
+        role: matchedUser.role || 'Staff',
+        initials: matchedUser.initials || matchedUser.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        color: matchedUser.color || '#FF5A1F'
+      }));
+
+      // Redirect to dashboard
       setTimeout(() => {
         window.location.href = 'index.html';
-      }, 400);
+      }, 350);
     }
 
-    /* ── Initialize on page load ── */
+    /* ── Init on load ── */
     document.addEventListener('DOMContentLoaded', () => {
-      renderDemoButtons();
-      // Pre-select first account (Owner)
-      selectAccount(0);
+      renderStaffChips();
+      pickUser(0); // pre-select Owner (Aamir Khan) with password 12345678
     });
   </script>
 </body>

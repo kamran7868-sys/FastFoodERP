@@ -7,11 +7,11 @@ const DB = {
   },
 
   users: [
-    { id: 1, name: 'Aamir Khan', username: 'aamir', email: 'aamir@biryanibits.pk', role: 'Owner', permission: 'Full access', status: 'active' },
-    { id: 2, name: 'Ali Hassan', username: 'ali', email: 'ali@biryanibits.pk', role: 'Manager', permission: 'All except settings', status: 'active' },
-    { id: 3, name: 'Naveed Akhtar', username: 'naveed', email: 'naveed@biryanibits.pk', role: 'Cashier', permission: 'POS, orders, customers', status: 'active' },
-    { id: 4, name: 'Kamran Shah', username: 'kamran', email: 'kamran@biryanibits.pk', role: 'Waiter', permission: 'POS, tables, orders', status: 'active' },
-    { id: 5, name: 'Rizwan Ahmed', username: 'rizwan', email: 'rizwan@biryanibits.pk', role: 'Chef', permission: 'Menu, recipes, stock', status: 'inactive' }
+    { id: 1, name: 'Aamir Khan', username: 'Aamir Khan', handle: 'aamir', email: 'aamir@biryanibits.pk', role: 'Owner', permission: 'Full access', status: 'active', password: '12345678' },
+    { id: 2, name: 'Ali Hassan', username: 'Ali Hassan', handle: 'ali', email: 'ali@biryanibits.pk', role: 'Manager', permission: 'All except settings', status: 'active', password: '12345678' },
+    { id: 3, name: 'Naveed Akhtar', username: 'Naveed Akhtar', handle: 'naveed', email: 'naveed@biryanibits.pk', role: 'Cashier', permission: 'POS, orders, customers', status: 'active', password: '12345678' },
+    { id: 4, name: 'Kamran Shah', username: 'Kamran Shah', handle: 'kamran', email: 'kamran@biryanibits.pk', role: 'Waiter', permission: 'POS, tables, orders', status: 'active', password: '12345678' },
+    { id: 5, name: 'Rizwan Ahmed', username: 'Rizwan Ahmed', handle: 'rizwan', email: 'rizwan@biryanibits.pk', role: 'Chef', permission: 'Menu, recipes, stock', status: 'inactive', password: '12345678' }
   ],
 
   categories: [
