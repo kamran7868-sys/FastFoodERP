@@ -7,12 +7,20 @@
       "destination": "/pages/index.html"
     },
     {
+      "source": "/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
       "source": "/pages/:path*",
       "destination": "/pages/:path*"
     },
     {
-      "source": "/assets/:path*",
-      "destination": "/assets/:path*"
+      "source": "/:page.html",
+      "destination": "/pages/:page.html"
+    },
+    {
+      "source": "/:page",
+      "destination": "/pages/:page.html"
     }
   ]
 }

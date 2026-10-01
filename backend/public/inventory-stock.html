@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Movements — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="inventory-stock">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Stock</h4>
+      <span class="text-secondary" style="font-size:13px;">Every stock-in, stock-out, adjustment and wastage — in one ledger.</span>
+    </div>
+    <div class="actions">
+      <a href="inventory-ingredients.html" class="btn btn-ghost"><i class="fa-solid fa-carrot me-1"></i>Ingredients</a>
+      <button class="btn btn-brand" onclick="openMoveModal()"><i class="fa-solid fa-arrows-rotate me-1"></i>Record Movement</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent green"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-green-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-arrow-trend-up"></i></div>
+          <div><div class="kpi-label">Stock In (this month)</div><div class="kpi-value" style="font-size:20px;" id="mvIn">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent red"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-red-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-arrow-trend-down"></i></div>
+          <div><div class="kpi-label">Stock Out (this month)</div><div class="kpi-value" style="font-size:20px;" id="mvOut">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent amber"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-amber-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-trash-can"></i></div>
+          <div><div class="kpi-label">Wastage</div><div class="kpi-value" style="font-size:20px;" id="mvWaste">0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent blue"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-blue-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-list-check"></i></div>
+          <div><div class="kpi-label">Movements</div><div class="kpi-value" style="font-size:20px;" id="mvCount">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="search-box" style="flex:1;min-width:200px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="moveSearch" placeholder="Search by item or note..." style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <select class="form-select form-select-sm" id="moveType" style="width:auto;">
+          <option value="All">All Types</option>
+          <option value="in">Stock In</option>
+          <option value="out">Stock Out</option>
+          <option value="adjust">Adjustment</option>
+          <option value="waste">Wastage</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Type</th>
+            <th class="text-end">Qty</th>
+            <th>Note</th>
+            <th>Recorded By</th>
+          </tr>
+        </thead>
+        <tbody id="moveBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Movement modal -->
+<div class="modal fade" id="moveModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Record Stock Movement</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Ingredient</label>
+        <select id="mvItem" class="form-select mb-3"></select>
+        <label class="form-label">Movement Type</label>
+        <select id="mvType" class="form-select mb-3">
+          <option value="in">Stock In (+)</option>
+          <option value="out">Stock Out (−)</option>
+          <option value="adjust">Adjustment (±)</option>
+          <option value="waste">Wastage (−)</option>
+        </select>
+        <label class="form-label">Quantity</label>
+        <input type="number" id="mvQty" class="form-control mb-3" min="0.1" step="0.1" placeholder="e.g. 5">
+        <label class="form-label">Note</label>
+        <input type="text" id="mvNote" class="form-control" placeholder="e.g. Purchase PO-2024-007">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="moveSave"><i class="fa-solid fa-floppy-disk me-1"></i>Save Movement</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+function qtyHtml(m) {
+  const pos = m.qty > 0;
+  const cls = m.type === 'in' ? 'text-success' : 'text-danger';
+  return '<span class="' + cls + '" style="font-weight:700;">' + (m.type === 'adjust' ? '' : (pos ? '+' : '−')) + m.qty + ' ' + esc(DB.ingredients.find(i => i.name === m.item)?.unit || '') + '</span>';
+}
+
+function renderMoveStats() {
+  document.getElementById('mvCount').textContent = DB.stockMoves.length;
+  document.getElementById('mvIn').textContent = DB.stockMoves.filter(m => m.type === 'in').length + ' entries';
+  document.getElementById('mvOut').textContent = DB.stockMoves.filter(m => m.type === 'out').length + ' entries';
+  document.getElementById('mvWaste').textContent = DB.stockMoves.filter(m => m.type === 'waste').reduce((s, m) => s + Math.abs(m.qty), 0);
+}
+
+function renderMoves() {
+  const q = (document.getElementById('moveSearch').value || '').toLowerCase();
+  const ty = document.getElementById('moveType').value;
+  const list = DB.stockMoves.filter(function (m) {
+    const okQ = !q || m.item.toLowerCase().includes(q) || (m.note || '').toLowerCase().includes(q);
+    const okT = ty === 'All' || m.type === ty;
+    return okQ && okT;
+  }).sort((a, b) => b.id - a.id);
+  const el = document.getElementById('moveBody');
+  if (!list.length) {
+    el.innerHTML = emptyRow(6, 'No movements found', 'Record a movement to see it here.');
+    return;
+  }
+  el.innerHTML = list.map(function (m) {
+    return '<tr>' +
+      '<td style="font-size:12.5px;">' + esc(m.date) + '</td>' +
+      '<td class="cell-fw">' + esc(m.item) + '</td>' +
+      '<td>' + stockPill(m.type) + '</td>' +
+      '<td class="text-end">' + qtyHtml(m) + '</td>' +
+      '<td style="font-size:12.5px;">' + esc(m.note || '—') + '</td>' +
+      '<td style="font-size:12.5px;">' + esc(m.by || '—') + '</td></tr>';
+  }).join('');
+}
+
+function openMoveModal() {
+  document.getElementById('mvItem').innerHTML = DB.ingredients.map(i => '<option>' + esc(i.name) + '</option>').join('');
+  document.getElementById('mvQty').value = '';
+  document.getElementById('mvNote').value = '';
+  document.getElementById('mvType').value = 'in';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('moveModal')).show();
+}
+
+document.getElementById('moveSave').addEventListener('click', function () {
+  const item = document.getElementById('mvItem').value;
+  const type = document.getElementById('mvType').value;
+  let qty = Number(document.getElementById('mvQty').value) || 0;
+  const note = document.getElementById('mvNote').value.trim();
+  if (qty <= 0) { showToast('Quantity must be greater than zero.', 'danger'); return; }
+
+  const ing = DB.ingredients.find(i => i.name === item);
+  if (type === 'in') {
+    ing.qty += qty;
+  } else if (type === 'out') {
+    ing.qty = Math.max(0, ing.qty - qty);
+    qty = -qty;
+  } else if (type === 'adjust') {
+    const signed = document.getElementById('mvQty').value.startsWith('-') ? -qty : qty;
+    ing.qty = Math.max(0, ing.qty + signed);
+    qty = signed;
+  } else {
+    ing.qty = Math.max(0, ing.qty - qty);
+    qty = -qty;
+  }
+
+  DB.stockMoves.unshift({
+    id: Math.max.apply(null, DB.stockMoves.map(m => m.id)) + 1,
+    item: item,
+    type: type,
+    qty: qty,
+    note: note,
+    date: todayStr(),
+    by: 'Aamir Khan'
+  });
+
+  bootstrap.Modal.getInstance(document.getElementById('moveModal')).hide();
+  showToast('Movement recorded for ' + item + '.', 'success');
+  renderMoveStats();
+  renderMoves();
+});
+
+document.getElementById('moveSearch').addEventListener('keyup', renderMoves);
+document.getElementById('moveType').addEventListener('change', renderMoves);
+
+document.addEventListener('DOMContentLoaded', function () {
+  renderMoveStats();
+  renderMoves();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add-ons — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="menu-addons">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Add-ons</h4>
+      <span class="text-secondary" style="font-size:13px;">Extra toppings and sides customers can add to any item.</span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-brand" onclick="openAddonModal()"><i class="fa-solid fa-plus me-1"></i>Add Add-on</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="search-box" style="flex:1;min-width:200px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="addonSearch" placeholder="Search add-ons..." style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <select class="form-select form-select-sm" id="addonStatus" style="width:auto;">
+          <option value="All">All Status</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Add-on</th>
+            <th class="text-end">Price</th>
+            <th class="text-center">Used in</th>
+            <th style="width:110px;">Status</th>
+            <th class="text-end" style="width:130px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="addonBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Add-on modal -->
+<div class="modal fade" id="addonModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addonModalTitle">Add Add-on</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Name</label>
+        <input type="text" id="aName" class="form-control mb-3" placeholder="e.g. Extra Cheese">
+        <label class="form-label">Price (Rs)</label>
+        <input type="number" id="aPrice" class="form-control mb-3" placeholder="e.g. 100" min="0">
+        <label class="form-label">Status</label>
+        <select id="aStatus" class="form-select">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="addonSave"><i class="fa-solid fa-floppy-disk me-1"></i>Save Add-on</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body">
+        <div class="es-icon" style="width:58px;height:58px;background:var(--danger-soft);color:var(--danger-dark);margin:0 auto 12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6 class="fw-bold" id="confirmMsg">Are you sure?</h6>
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmYesBtn">Yes, continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+let editingAddon = null;
+
+function renderAddons() {
+  const q = (document.getElementById('addonSearch').value || '').toLowerCase();
+  const st = document.getElementById('addonStatus').value;
+  const list = DB.addons.filter(function (a) {
+    const okQ = !q || a.name.toLowerCase().includes(q);
+    const okS = st === 'All' || a.status === st.toLowerCase();
+    return okQ && okS;
+  });
+  const el = document.getElementById('addonBody');
+  if (!list.length) {
+    el.innerHTML = emptyRow(5, 'No add-ons found', 'Add an add-on to make it selectable at the counter.');
+    return;
+  }
+  el.innerHTML = list.map(function (a) {
+    const used = DB.menu.filter(m => m.addons.includes(a.id)).length;
+    return '<tr>' +
+      '<td class="cell-fw">' + esc(a.name) + '</td>' +
+      '<td class="text-end cell-fw">' + formatPKR(a.price) + '</td>' +
+      '<td class="text-center">' + used + '</td>' +
+      '<td>' + statusBadge(a.status) + '</td>' +
+      '<td class="text-end"><div class="d-inline-flex gap-1">' +
+      '<button class="btn btn-ghost btn-sm" onclick="openAddonModal(' + a.id + ')"><i class="fa-regular fa-pen-to-square"></i></button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="delAddon(' + a.id + ')"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+function openAddonModal(id) {
+  editingAddon = id ? DB.addons.find(a => a.id === id) : null;
+  document.getElementById('addonModalTitle').textContent = editingAddon ? 'Edit Add-on' : 'Add Add-on';
+  document.getElementById('aName').value = editingAddon ? editingAddon.name : '';
+  document.getElementById('aPrice').value = editingAddon ? editingAddon.price : '';
+  document.getElementById('aStatus').value = editingAddon ? editingAddon.status : 'active';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('addonModal')).show();
+}
+
+document.getElementById('addonSave').addEventListener('click', function () {
+  const name = document.getElementById('aName').value.trim();
+  const price = Number(document.getElementById('aPrice').value) || 0;
+  if (!name) { showToast('Add-on name is required.', 'danger'); return; }
+  if (price <= 0) { showToast('Price must be greater than zero.', 'danger'); return; }
+  if (editingAddon) {
+    editingAddon.name = name;
+    editingAddon.price = price;
+    editingAddon.status = document.getElementById('aStatus').value;
+    showToast('Add-on updated.', 'success');
+  } else {
+    DB.addons.push({ id: Math.max.apply(null, DB.addons.map(a => a.id)) + 1, name: name, price: price, status: document.getElementById('aStatus').value });
+    showToast('Add-on added.', 'success');
+  }
+  bootstrap.Modal.getInstance(document.getElementById('addonModal')).hide();
+  renderAddons();
+});
+
+function delAddon(id) {
+  const a = DB.addons.find(x => x.id === id);
+  const used = DB.menu.filter(m => m.addons.includes(id)).length;
+  confirmAction('Delete add-on <b>' + esc(a.name) + '</b>?' +
+    (used ? '<br><span class="text-secondary" style="font-size:12.5px;">' + used + ' menu item(s) currently offer it.</span>' : ''), function () {
+    DB.menu.forEach(m => { m.addons = m.addons.filter(x => x !== id); });
+    DB.addons = DB.addons.filter(x => x.id !== id);
+    showToast('Add-on deleted.', 'success');
+    renderAddons();
+  }, 'Delete');
+}
+
+document.getElementById('addonSearch').addEventListener('keyup', renderAddons);
+document.getElementById('addonStatus').addEventListener('change', renderAddons);
+
+document.addEventListener('DOMContentLoaded', renderAddons);
+</script>
+</body>
+</html>
