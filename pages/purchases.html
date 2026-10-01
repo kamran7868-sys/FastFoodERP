@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchases — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="purchases">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Purchases</h4>
+      <span class="text-secondary" style="font-size:13px;">Purchase orders to suppliers and their payment status.</span>
+    </div>
+    <div class="actions">
+      <a href="suppliers.html" class="btn btn-ghost"><i class="fa-solid fa-truck-field me-1"></i>Suppliers</a>
+      <button class="btn btn-brand" onclick="openPoModal()"><i class="fa-solid fa-plus me-1"></i>New Purchase</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent blue"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-blue-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <div><div class="kpi-label">Total Purchases</div><div class="kpi-value" style="font-size:20px;" id="poTotal">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent green"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-green-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-circle-check"></i></div>
+          <div><div class="kpi-label">Paid</div><div class="kpi-value" style="font-size:20px;" id="poPaid">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent amber"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-amber-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-regular fa-clock"></i></div>
+          <div><div class="kpi-label">Pending</div><div class="kpi-value" style="font-size:20px;" id="poPending">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent violet"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-violet-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-receipt"></i></div>
+          <div><div class="kpi-label">Purchase Orders</div><div class="kpi-value" style="font-size:20px;" id="poCount">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="search-box" style="flex:1;min-width:200px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="poSearch" placeholder="Search by PO #, supplier or note..." style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <select class="form-select form-select-sm" id="poStatus" style="width:auto;">
+          <option value="All">All Status</option>
+          <option>Paid</option>
+          <option>Pending</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>PO #</th>
+            <th>Date</th>
+            <th>Supplier</th>
+            <th class="text-center">Items</th>
+            <th class="text-end">Amount</th>
+            <th style="width:110px;">Status</th>
+            <th>Note</th>
+            <th class="text-end" style="width:130px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="poBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Purchase modal -->
+<div class="modal fade" id="poModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Purchase Order</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Supplier</label>
+        <select id="poSupplier" class="form-select mb-3"></select>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Date</label>
+            <input type="text" id="poDate" class="form-control" readonly>
+          </div>
+          <div class="col-6">
+            <label class="form-label">No. of Items</label>
+            <input type="number" id="poItems" class="form-control" min="1" value="1">
+          </div>
+        </div>
+        <label class="form-label mt-3">Amount (Rs)</label>
+        <input type="number" id="poAmount" class="form-control mb-3" min="0" placeholder="e.g. 12500">
+        <label class="form-label">Status</label>
+        <select id="poStatusSel" class="form-select mb-3">
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+        </select>
+        <label class="form-label">Note</label>
+        <input type="text" id="poNote" class="form-control" placeholder="e.g. Chicken 10kg, beef 8kg">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="poSave"><i class="fa-solid fa-floppy-disk me-1"></i>Save Purchase</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body">
+        <div class="es-icon" style="width:58px;height:58px;background:var(--danger-soft);color:var(--danger-dark);margin:0 auto 12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6 class="fw-bold" id="confirmMsg">Are you sure?</h6>
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmYesBtn">Yes, continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+function renderPoStats() {
+  const total = DB.purchases.reduce((s, p) => s + p.amount, 0);
+  const paid = DB.purchases.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
+  document.getElementById('poTotal').textContent = formatPKR(total);
+  document.getElementById('poPaid').textContent = formatPKR(paid);
+  document.getElementById('poPending').textContent = formatPKR(total - paid);
+  document.getElementById('poCount').textContent = DB.purchases.length;
+}
+
+function renderPurchases() {
+  const q = (document.getElementById('poSearch').value || '').toLowerCase();
+  const st = document.getElementById('poStatus').value;
+  const list = DB.purchases.filter(function (p) {
+    const okQ = !q || p.id.toLowerCase().includes(q) || p.supplier.toLowerCase().includes(q) || (p.note || '').toLowerCase().includes(q);
+    const okS = st === 'All' || p.status === st.toLowerCase();
+    return okQ && okS;
+  });
+  const el = document.getElementById('poBody');
+  if (!list.length) {
+    el.innerHTML = emptyRow(8, 'No purchases found', 'Record a purchase to track supplier payments.');
+    return;
+  }
+  el.innerHTML = list.map(function (p) {
+    return '<tr>' +
+      '<td class="cell-fw">' + esc(p.id) + '</td>' +
+      '<td style="font-size:12.5px;">' + esc(p.date) + '</td>' +
+      '<td>' + esc(p.supplier) + '</td>' +
+      '<td class="text-center">' + p.items + '</td>' +
+      '<td class="text-end cell-fw">' + formatPKR(p.amount) + '</td>' +
+      '<td>' + statusBadge(p.status) + '</td>' +
+      '<td style="font-size:12.5px;color:var(--text-muted);max-width:220px;">' + esc(p.note || '—') + '</td>' +
+      '<td class="text-end"><div class="d-inline-flex gap-1">' +
+      (p.status === 'pending'
+        ? '<button class="btn btn-ghost btn-sm" onclick="markPaid(\'' + p.id + '\')" title="Mark paid"><i class="fa-solid fa-circle-check"></i></button>'
+        : '') +
+      '<button class="btn btn-ghost btn-sm" onclick="delPo(\'' + p.id + '\')" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+function markPaid(id) {
+  const p = DB.purchases.find(x => x.id === id);
+  confirmAction('Mark <b>' + esc(p.id) + '</b> from <b>' + esc(p.supplier) + '</b> as paid?', function () {
+    p.status = 'paid';
+    showToast('Purchase marked as paid.', 'success');
+    renderPoStats();
+    renderPurchases();
+  }, 'Mark Paid');
+}
+
+function delPo(id) {
+  const p = DB.purchases.find(x => x.id === id);
+  confirmAction('Delete purchase <b>' + esc(p.id) + '</b>?', function () {
+    DB.purchases = DB.purchases.filter(x => x.id !== id);
+    showToast('Purchase deleted.', 'success');
+    renderPoStats();
+    renderPurchases();
+  }, 'Delete');
+}
+
+function openPoModal() {
+  document.getElementById('poSupplier').innerHTML = DB.suppliers.filter(s => s.status === 'active')
+    .map(s => '<option>' + esc(s.name) + '</option>').join('');
+  document.getElementById('poDate').value = todayStr();
+  document.getElementById('poItems').value = 1;
+  document.getElementById('poAmount').value = '';
+  document.getElementById('poStatusSel').value = 'paid';
+  document.getElementById('poNote').value = '';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('poModal')).show();
+}
+
+document.getElementById('poSave').addEventListener('click', function () {
+  const supplier = document.getElementById('poSupplier').value;
+  const amount = Number(document.getElementById('poAmount').value) || 0;
+  const items = Number(document.getElementById('poItems').value) || 1;
+  if (!supplier) { showToast('Select a supplier.', 'danger'); return; }
+  if (amount <= 0) { showToast('Amount must be greater than zero.', 'danger'); return; }
+  const maxNum = DB.purchases.map(p => Number(p.id.replace(/[^0-9]/g, '')));
+  const next = (maxNum.length ? Math.max.apply(null, maxNum) : 0) + 1;
+  DB.purchases.unshift({
+    id: 'PO-2024-' + String(next).padStart(3, '0'),
+    date: document.getElementById('poDate').value,
+    supplier: supplier,
+    amount: amount,
+    items: items,
+    status: document.getElementById('poStatusSel').value,
+    note: document.getElementById('poNote').value.trim()
+  });
+  bootstrap.Modal.getInstance(document.getElementById('poModal')).hide();
+  showToast('Purchase order created.', 'success');
+  renderPoStats();
+  renderPurchases();
+});
+
+document.getElementById('poSearch').addEventListener('keyup', renderPurchases);
+document.getElementById('poStatus').addEventListener('change', renderPurchases);
+
+document.addEventListener('DOMContentLoaded', function () {
+  renderPoStats();
+  renderPurchases();
+});
+</script>
+</body>
+</html>

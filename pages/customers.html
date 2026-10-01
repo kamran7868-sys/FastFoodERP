@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="customers">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Customers</h4>
+      <span class="text-secondary" style="font-size:13px;">Frequent customers, their locations and outstanding balances.</span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-brand" onclick="openCustModal()"><i class="fa-solid fa-plus me-1"></i>Add Customer</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent blue"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-blue-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-users"></i></div>
+          <div><div class="kpi-label">Total Customers</div><div class="kpi-value" style="font-size:20px;" id="cuCount">0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent green"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-green-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-sack-dollar"></i></div>
+          <div><div class="kpi-label">Total Spent</div><div class="kpi-value" style="font-size:20px;" id="cuSpent">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent amber"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-amber-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+          <div><div class="kpi-label">Outstanding</div><div class="kpi-value" style="font-size:20px;" id="cuBal">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent violet"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-violet-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-location-dot"></i></div>
+          <div><div class="kpi-label">Areas Served</div><div class="kpi-value" style="font-size:20px;" id="cuAreas">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="search-box" style="flex:1;min-width:200px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="custSearch" placeholder="Search by name, phone or location..." style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <select class="form-select form-select-sm" id="custFilter" style="width:auto;">
+          <option value="All">All Customers</option>
+          <option value="balance">With Balance</option>
+          <option value="vip">VIP (Rs 20,000+)</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th class="text-center">Orders</th>
+            <th class="text-end">Total Spent</th>
+            <th class="text-end">Balance</th>
+            <th>Last Order</th>
+            <th class="text-end" style="width:130px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="custBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Customer modal -->
+<div class="modal fade" id="custModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="custModalTitle">Add Customer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="cName" class="form-control mb-3" placeholder="e.g. Ahmed Raza">
+        <label class="form-label">Phone</label>
+        <input type="text" id="cPhone" class="form-control mb-3" placeholder="e.g. 0300-1234567">
+        <label class="form-label">Location / Area</label>
+        <input type="text" id="cLoc" class="form-control mb-3" placeholder="e.g. Gulberg III, Lahore">
+        <label class="form-label">Opening Balance (Rs)</label>
+        <input type="number" id="cBal" class="form-control" min="0" value="0">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="custSave"><i class="fa-solid fa-floppy-disk me-1"></i>Save Customer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body">
+        <div class="es-icon" style="width:58px;height:58px;background:var(--danger-soft);color:var(--danger-dark);margin:0 auto 12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6 class="fw-bold" id="confirmMsg">Are you sure?</h6>
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmYesBtn">Yes, continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+let editingCust = null;
+
+function renderCustStats() {
+  document.getElementById('cuCount').textContent = DB.customers.length;
+  document.getElementById('cuSpent').textContent = formatPKR(DB.customers.reduce((s, c) => s + c.spent, 0));
+  document.getElementById('cuBal').textContent = formatPKR(DB.customers.reduce((s, c) => s + c.balance, 0));
+  document.getElementById('cuAreas').textContent = new Set(DB.customers.map(c => c.location)).size;
+}
+
+function renderCustomers() {
+  const q = (document.getElementById('custSearch').value || '').toLowerCase();
+  const f = document.getElementById('custFilter').value;
+  const list = DB.customers.filter(function (c) {
+    const okQ = !q || c.name.toLowerCase().includes(q) || c.phone.includes(q) || c.location.toLowerCase().includes(q);
+    const okF = f === 'All' || (f === 'balance' ? c.balance > 0 : c.spent >= 20000);
+    return okQ && okF;
+  });
+  const el = document.getElementById('custBody');
+  if (!list.length) {
+    el.innerHTML = emptyRow(8, 'No customers found', 'Add a customer to track their orders.');
+    return;
+  }
+  el.innerHTML = list.map(function (c) {
+    const vip = c.spent >= 20000;
+    return '<tr>' +
+      '<td><div class="d-flex align-items-center gap-2">' +
+      '<span class="avatar" style="width:34px;height:34px;background:var(--brand-soft);color:var(--brand-dark);font-size:12px;">' + esc(c.name.split(' ').map(w => w[0]).slice(0, 2).join('')) + '</span>' +
+      '<span class="cell-fw">' + esc(c.name) + (vip ? ' <i class="fa-solid fa-crown text-warning" title="VIP customer"></i>' : '') + '</span></div></td>' +
+      '<td>' + esc(c.phone) + '</td>' +
+      '<td><i class="fa-solid fa-location-dot me-1 text-secondary" style="font-size:11px;"></i>' + esc(c.location) + '</td>' +
+      '<td class="text-center">' + c.orders + '</td>' +
+      '<td class="text-end cell-fw">' + formatPKR(c.spent) + '</td>' +
+      '<td class="text-end"><span class="' + (c.balance > 0 ? 'text-danger fw-bold' : 'text-success fw-bold') + '">' + formatPKR(c.balance) + '</span></td>' +
+      '<td style="font-size:12.5px;">' + esc(c.lastOrder) + '</td>' +
+      '<td class="text-end"><div class="d-inline-flex gap-1">' +
+      '<button class="btn btn-ghost btn-sm" onclick="openCustModal(' + c.id + ')"><i class="fa-regular fa-pen-to-square"></i></button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="delCust(' + c.id + ')"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+function openCustModal(id) {
+  editingCust = id ? DB.customers.find(c => c.id === id) : null;
+  document.getElementById('custModalTitle').textContent = editingCust ? 'Edit Customer' : 'Add Customer';
+  document.getElementById('cName').value = editingCust ? editingCust.name : '';
+  document.getElementById('cPhone').value = editingCust ? editingCust.phone : '';
+  document.getElementById('cLoc').value = editingCust ? editingCust.location : '';
+  document.getElementById('cBal').value = editingCust ? editingCust.balance : 0;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('custModal')).show();
+}
+
+document.getElementById('custSave').addEventListener('click', function () {
+  const name = document.getElementById('cName').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  const location = document.getElementById('cLoc').value.trim();
+  if (!name) { showToast('Customer name is required.', 'danger'); return; }
+  if (!location) { showToast('Location is required for delivery.', 'danger'); return; }
+  const balance = Number(document.getElementById('cBal').value) || 0;
+  if (editingCust) {
+    editingCust.name = name;
+    editingCust.phone = phone;
+    editingCust.location = location;
+    editingCust.balance = balance;
+    showToast('Customer updated.', 'success');
+  } else {
+    DB.customers.push({
+      id: Math.max.apply(null, DB.customers.map(c => c.id)) + 1,
+      name: name, phone: phone, location: location,
+      orders: 0, spent: 0, balance: balance, lastOrder: '—'
+    });
+    showToast('Customer added.', 'success');
+  }
+  bootstrap.Modal.getInstance(document.getElementById('custModal')).hide();
+  renderCustStats();
+  renderCustomers();
+});
+
+function delCust(id) {
+  const c = DB.customers.find(x => x.id === id);
+  confirmAction('Delete customer <b>' + esc(c.name) + '</b>?', function () {
+    DB.customers = DB.customers.filter(x => x.id !== id);
+    showToast('Customer deleted.', 'success');
+    renderCustStats();
+    renderCustomers();
+  }, 'Delete');
+}
+
+document.getElementById('custSearch').addEventListener('keyup', renderCustomers);
+document.getElementById('custFilter').addEventListener('change', renderCustomers);
+
+document.addEventListener('DOMContentLoaded', function () {
+  renderCustStats();
+  renderCustomers();
+});
+</script>
+</body>
+</html>

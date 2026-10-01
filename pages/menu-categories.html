@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Categories — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="menu-categories">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Categories</h4>
+      <span class="text-secondary" style="font-size:13px;">Organise menu items into categories shown at the counter.</span>
+    </div>
+    <div class="actions">
+      <a href="menu-items.html" class="btn btn-ghost"><i class="fa-solid fa-burger me-1"></i>Menu Items</a>
+      <button class="btn btn-brand" onclick="openCatModal()"><i class="fa-solid fa-plus me-1"></i>Add Category</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="search-box" style="flex:1;min-width:200px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="catSearch" placeholder="Search categories..." style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <select class="form-select form-select-sm" id="catStatus" style="width:auto;">
+          <option value="All">All Status</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th style="width:64px;">Icon</th>
+            <th>Category Name</th>
+            <th class="text-center" style="width:70px;">Items</th>
+            <th style="width:110px;">Status</th>
+            <th class="text-end" style="width:130px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="catBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Category modal -->
+<div class="modal fade" id="catModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="catModalTitle">Add Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Emoji Icon</label>
+        <input type="text" id="cEmoji" class="form-control mb-3" placeholder="e.g. 🍔" maxlength="4">
+        <label class="form-label">Category Name</label>
+        <input type="text" id="cName" class="form-control mb-3" placeholder="e.g. Burgers">
+        <label class="form-label">Status</label>
+        <select id="cStatus" class="form-select">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="cSave"><i class="fa-solid fa-floppy-disk me-1"></i>Save Category</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body">
+        <div class="es-icon" style="width:58px;height:58px;background:var(--danger-soft);color:var(--danger-dark);margin:0 auto 12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6 class="fw-bold" id="confirmMsg">Are you sure?</h6>
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmYesBtn">Yes, continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+let editingCat = null;
+
+function renderCategories() {
+  const q = (document.getElementById('catSearch').value || '').toLowerCase();
+  const st = document.getElementById('catStatus').value;
+  const list = DB.categories.filter(function (c) {
+    const okQ = !q || c.name.toLowerCase().includes(q);
+    const okS = st === 'All' || c.status === st.toLowerCase();
+    return okQ && okS;
+  });
+  const el = document.getElementById('catBody');
+  if (!list.length) {
+    el.innerHTML = emptyRow(5, 'No categories found', 'Add a category to get started.');
+    return;
+  }
+  el.innerHTML = list.map(function (c) {
+    const count = DB.menu.filter(m => m.category === c.name).length;
+    return '<tr>' +
+      '<td><span class="rank-chip" style="font-size:17px;width:38px;height:38px;">' + esc(c.emoji || '🍽️') + '</span></td>' +
+      '<td class="cell-fw">' + esc(c.name) + '</td>' +
+      '<td class="text-center">' + count + '</td>' +
+      '<td>' + statusBadge(c.status) + '</td>' +
+      '<td class="text-end"><div class="d-inline-flex gap-1">' +
+      '<button class="btn btn-ghost btn-sm" onclick="openCatModal(' + c.id + ')"><i class="fa-regular fa-pen-to-square"></i></button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="delCat(' + c.id + ')"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+function openCatModal(id) {
+  editingCat = id ? DB.categories.find(c => c.id === id) : null;
+  document.getElementById('catModalTitle').textContent = editingCat ? 'Edit Category' : 'Add Category';
+  document.getElementById('cEmoji').value = editingCat ? (editingCat.emoji || '') : '';
+  document.getElementById('cName').value = editingCat ? editingCat.name : '';
+  document.getElementById('cStatus').value = editingCat ? editingCat.status : 'active';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('catModal')).show();
+}
+
+document.getElementById('cSave').addEventListener('click', function () {
+  const name = document.getElementById('cName').value.trim();
+  const emoji = document.getElementById('cEmoji').value.trim() || '🍽️';
+  if (!name) { showToast('Category name is required.', 'danger'); return; }
+  if (editingCat) {
+    editingCat.name = name;
+    editingCat.emoji = emoji;
+    editingCat.status = document.getElementById('cStatus').value;
+    showToast('Category updated.', 'success');
+  } else {
+    DB.categories.push({ id: Math.max.apply(null, DB.categories.map(c => c.id)) + 1, name: name, emoji: emoji, status: document.getElementById('cStatus').value });
+    showToast('Category added.', 'success');
+  }
+  bootstrap.Modal.getInstance(document.getElementById('catModal')).hide();
+  renderCategories();
+});
+
+function delCat(id) {
+  const c = DB.categories.find(x => x.id === id);
+  const inUse = DB.menu.filter(m => m.category === c.name).length;
+  confirmAction('Delete category <b>' + esc(c.name) + '</b>?' +
+    (inUse ? '<br><span class="text-secondary" style="font-size:12.5px;">' + inUse + ' menu item(s) use this category.</span>' : ''), function () {
+    DB.categories = DB.categories.filter(x => x.id !== id);
+    showToast('Category deleted.', 'success');
+    renderCategories();
+  }, 'Delete');
+}
+
+document.getElementById('catSearch').addEventListener('keyup', renderCategories);
+document.getElementById('catStatus').addEventListener('change', renderCategories);
+
+document.addEventListener('DOMContentLoaded', renderCategories);
+</script>
+</body>
+</html>
