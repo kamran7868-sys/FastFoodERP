@@ -849,9 +849,11 @@ textarea.form-control { height:auto; padding:var(--sp-2) var(--sp-3); line-heigh
   flex:1; max-width:52px; border-radius:4px 4px 0 0;
   min-height:4px; background:var(--brand);
   opacity:.85; cursor:pointer; transition:opacity var(--t);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 .bar:hover { opacity:1; }
-.bar.second { background:#64748B; }  /* neutral slate instead of saturated teal */
+.bar.second { background:#64748B; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 .bar.third  { background:var(--violet); }
 
 .bar-label { font-size:10.5px; color:var(--tx-muted); font-weight:500; white-space:nowrap; }
@@ -1125,19 +1127,43 @@ button.menu-item { font-family:var(--font); }
 }
 
 .print-report-head { display:none; }
+
+/* ── Report print — triggered ONLY inside @media print ── */
 @media print {
-  body.report-print > *:not(.main-content) { display:none !important; }
-  body.report-print .main-content { margin:0 !important; padding:0 !important; }
-  body.report-print .page-head .actions,
-  body.report-print #rangeBtns, body.report-print .menu-cat-btn,
-  body.report-print .page-head .btn { display:none !important; }
-  body.report-print .print-report-head { display:block !important; text-align:center; border-bottom:2px solid #111; padding-bottom:10px; margin-bottom:14px; }
-  body.report-print .card { border:1px solid #ddd; box-shadow:none !important; break-inside:avoid; margin-bottom:10px; }
-  body.report-print .table th { background:#eee !important; border-bottom:1px solid #999; }
-  body.report-print .table td,body.report-print .table th { border:1px solid #ccc; padding:5px 8px; }
-  .bf-sidebar,.bf-topbar,.no-print,.modal { display:none !important; }
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+
+  /* Always hide layout chrome when printing */
+  .bf-sidebar, .bf-topbar, .bf-overlay,
+  .no-print, .modal { display:none !important; }
+
+  body { background:#fff !important; }
+
+  /* Show the page's own print-only header */
+  .rpt-print-header { display:block !important; }
+
+  /* Remove main-content margin/padding so content starts at top-left */
   .main-content { margin:0 !important; padding:0 !important; }
-  .card { border:none; box-shadow:none; }
+
+  /* Hide action buttons and range pickers */
+  .page-head .actions, #rangeBtns, .no-print { display:none !important; }
+
+  /* Cards */
+  .card { border:1px solid #ddd !important; box-shadow:none !important; break-inside:avoid; margin-bottom:10px; }
+  .card-header { background:#f5f5f5 !important; border-bottom:1px solid #ddd !important; }
+
+  /* Tables */
+  .table { border-collapse:collapse; }
+  .table th { background:#eee !important; border-bottom:1px solid #999 !important; }
+  .table td, .table th { border:1px solid #ccc; padding:6px 10px; font-size:12px; }
+  .table tbody tr:hover td { background:transparent !important; }
+
+  /* Progress */
+  .progress { background:#eee !important; }
+  .progress-bar { background:#EA580C !important; }
+
+  /* Rank chip */
+  .rank-chip.top { background:#EA580C !important; color:#fff !important; }
 }
 
 /* ──────────────────────────────────────────────────────────────────
