@@ -14,9 +14,9 @@
 
   <div class="row g-3 mb-3">
     <div class="col-12 col-sm-6 col-lg-3">
-      <div class="card kpi-card">
+      <div class="card kpi-card kpi-card-highlight">
         <div class="kpi-body">
-          <div class="kpi-icon bg-orange-soft"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="kpi-icon" style="background:var(--brand-gradient);color:#fff;box-shadow:0 4px 12px rgba(255,107,31,0.3);"><i class="fa-solid fa-chart-line"></i></div>
           <div class="flex-grow-1">
             <div class="kpi-label">Today's Sales</div>
             <div class="kpi-value" id="kpiSales">Rs 0</div>
@@ -82,7 +82,7 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="bar-chart" id="salesChart"></div>
+          <div id="salesChart" style="min-height:220px;width:100%;"></div>
         </div>
       </div>
     </div>
@@ -333,20 +333,132 @@ const CHART_DATA = {
   month: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], sales: [82000, 94000, 101000, 88700], orders: [45, 51, 56, 49] }
 };
 
-function renderChart(range) {
-  const d = CHART_DATA[range];
-  const maxSales = Math.max.apply(null, d.sales);
-  const maxOrders = Math.max.apply(null, d.orders);
-  const groups = d.labels.map(function (label, i) {
-    return {
-      label: label,
-      bars: [
-        { h: Math.round((d.sales[i] / maxSales) * 100), title: 'Sales · ' + label + ': ' + formatPKR(d.sales[i]) },
-        { h: Math.round((d.orders[i] / maxOrders) * 100), cls: 'second', title: 'Orders · ' + label + ': ' + d.orders[i] }
-      ]
-    };
+function renderAreaGraph(containerId, data) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  const labels = data.labels || [];
+  const sales = data.sales || [];
+  const orders = data.orders || [];
+
+  const maxSales = Math.max.apply(null, sales) || 1;
+  const maxOrders = Math.max.apply(null, orders) || 1;
+
+  const width = 640;
+  const height = 210;
+  const padLeft = 52;
+  const padRight = 24;
+  const padTop = 20;
+  const padBottom = 30;
+
+  const chartW = width - padLeft - padRight;
+  const chartH = height - padTop - padBottom;
+  const baselineY = padTop + chartH;
+
+  const pointsSales = sales.map(function (val, i) {
+    const x = padLeft + (i / (sales.length - 1 || 1)) * chartW;
+    const y = padTop + (1 - val / (maxSales * 1.18)) * chartH;
+    return { x: x, y: y, val: val, label: labels[i] };
   });
-  barChart('salesChart', groups);
+
+  const pointsOrders = orders.map(function (val, i) {
+    const x = padLeft + (i / (orders.length - 1 || 1)) * chartW;
+    const y = padTop + (1 - val / (maxOrders * 1.3)) * chartH;
+    return { x: x, y: y, val: val, label: labels[i] };
+  });
+
+  // Calculate smooth cubic spline
+  function getSpline(pts) {
+    if (!pts.length) return '';
+    if (pts.length === 1) return 'M ' + pts[0].x + ' ' + pts[0].y;
+    let p = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = i > 0 ? pts[i - 1] : pts[i];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = i < pts.length - 2 ? pts[i + 2] : p2;
+      const cp1x = p1.x + (p2.x - p0.x) / 5.5;
+      const cp1y = p1.y + (p2.y - p0.y) / 5.5;
+      const cp2x = p2.x - (p3.x - p1.x) / 5.5;
+      const cp2y = p2.y - (p3.y - p1.y) / 5.5;
+      p += ' C ' + cp1x.toFixed(1) + ' ' + cp1y.toFixed(1) + ', ' + cp2x.toFixed(1) + ' ' + cp2y.toFixed(1) + ', ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+    }
+    return p;
+  }
+
+  const salesSpline = getSpline(pointsSales);
+  const ordersSpline = getSpline(pointsOrders);
+
+  const salesArea = salesSpline +
+    ' L ' + pointsSales[pointsSales.length - 1].x.toFixed(1) + ' ' + baselineY +
+    ' L ' + pointsSales[0].x.toFixed(1) + ' ' + baselineY + ' Z';
+
+  // Grid lines
+  const gridSteps = 3;
+  let gridLines = '';
+  for (let g = 0; g <= gridSteps; g++) {
+    const gy = padTop + (g / gridSteps) * chartH;
+    const gVal = Math.round(maxSales * 1.18 * (1 - g / gridSteps));
+    gridLines +=
+      '<line x1="' + padLeft + '" y1="' + gy + '" x2="' + (width - padRight) + '" y2="' + gy + '" stroke="#EDE3DA" stroke-dasharray="4 4" stroke-width="1"/>' +
+      '<text x="' + (padLeft - 10) + '" y="' + (gy + 4) + '" text-anchor="end" fill="#94A3B8" font-size="10.5" font-weight="600" font-family="var(--font)">' +
+      (gVal >= 1000 ? (Math.round(gVal / 1000) + 'k') : gVal) + '</text>';
+  }
+
+  // X axis labels
+  let xLabels = '';
+  pointsSales.forEach(function (pt) {
+    xLabels +=
+      '<text x="' + pt.x.toFixed(1) + '" y="' + (height - 6) + '" text-anchor="middle" fill="#64748B" font-size="11" font-weight="600" font-family="var(--font)">' +
+      pt.label + '</text>';
+  });
+
+  // Data nodes & tooltips
+  let nodesSales = '';
+  pointsSales.forEach(function (pt, idx) {
+    const ordVal = orders[idx] || 0;
+    nodesSales +=
+      '<g class="graph-node" tabindex="0">' +
+        '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="5" fill="#FFFFFF" stroke="#FF6B1F" stroke-width="3"/>' +
+        '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="16" fill="transparent" class="graph-hit"/>' +
+        '<title>' + pt.label + ' • Sales: ' + formatPKR(pt.val) + ' | Orders: ' + ordVal + '</title>' +
+      '</g>';
+  });
+
+  let nodesOrders = '';
+  pointsOrders.forEach(function (pt) {
+    nodesOrders +=
+      '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="3.5" fill="#FFFFFF" stroke="#64748B" stroke-width="2"/>';
+  });
+
+  const svgHTML =
+    '<div class="bf-graph-wrapper">' +
+      '<svg viewBox="0 0 ' + width + ' ' + height + '" class="bf-sales-svg" preserveAspectRatio="none">' +
+        '<defs>' +
+          '<linearGradient id="salesAreaGrad" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0%" stop-color="#FF6B1F" stop-opacity="0.32"/>' +
+            '<stop offset="80%" stop-color="#FF8A00" stop-opacity="0.05"/>' +
+            '<stop offset="100%" stop-color="#FF8A00" stop-opacity="0.0"/>' +
+          '</linearGradient>' +
+          '<filter id="glowSales" x="-20%" y="-20%" width="140%" height="140%">' +
+            '<feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#FF6B1F" flood-opacity="0.28"/>' +
+          '</filter>' +
+        '</defs>' +
+        gridLines +
+        xLabels +
+        '<path d="' + salesArea + '" fill="url(#salesAreaGrad)"/>' +
+        '<path d="' + ordersSpline + '" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/>' +
+        '<path d="' + salesSpline + '" fill="none" stroke="#FF6B1F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glowSales)"/>' +
+        nodesOrders +
+        nodesSales +
+      '</svg>' +
+    '</div>';
+
+  el.innerHTML = svgHTML;
+}
+
+function renderChart(range) {
+  renderAreaGraph('salesChart', CHART_DATA[range]);
 }
 
 document.querySelectorAll('[data-range]').forEach(function (btn) {

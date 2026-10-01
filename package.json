@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "echo \"BiteFlow Frontend & Backend API ready for Vercel deployment\""
+    "build": "node build.js"
   }
 }
