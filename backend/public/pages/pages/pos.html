@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS / New Sale — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="pos">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">New Sale</h4>
+      <span class="text-secondary" style="font-size:13px;">Pick items, review the cart and complete the order.</span>
+    </div>
+    <div class="actions">
+      <a href="orders.html" class="btn btn-ghost"><i class="fa-solid fa-list-check me-1"></i>View Orders</a>
+    </div>
+  </div>
+
+  <div class="pos-layout">
+
+    <!-- Left: menu -->
+    <div class="pos-items">
+      <div class="card">
+        <div class="filter-bar">
+          <div class="search-box" style="flex:1;min-width:200px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="posSearch" placeholder="Search items... e.g. zinger, pizza, coffee" style="width:100%;">
+          </div>
+          <div class="filter-group" id="catFilter">
+            <button type="button" class="menu-cat-btn active" data-cat="All">All</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="menu-grid" id="menuGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: cart -->
+    <div class="pos-cart">
+      <div class="card">
+        <div class="card-header">
+          <span><i class="fa-solid fa-cart-shopping me-1"></i> Current Order</span>
+          <span class="sub" id="cartCount">0 items</span>
+        </div>
+        <div class="card-body pb-2">
+          <div class="pos-mode-btns mb-3" id="modeBtns">
+            <button type="button" class="pos-mode-btn active" data-mode="Dine-in"><i class="fa-solid fa-chair"></i><small>Dine-in</small></button>
+            <button type="button" class="pos-mode-btn" data-mode="Takeaway"><i class="fa-solid fa-bag-shopping"></i><small>Takeaway</small></button>
+            <button type="button" class="pos-mode-btn" data-mode="Delivery"><i class="fa-solid fa-motorcycle"></i><small>Delivery</small></button>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label">Table</label>
+              <select class="form-select form-select-sm" id="posTable"></select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Customer</label>
+              <select class="form-select form-select-sm" id="posCustomer"></select>
+            </div>
+          </div>
+
+          <div class="cart-scroll" id="cartItems"></div>
+        </div>
+        <div class="card-body pt-0">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <label class="form-label mb-0" style="white-space:nowrap;">Discount (Rs)</label>
+            <input type="number" id="posDiscount" class="form-control form-control-sm" value="0" min="0">
+          </div>
+          <div class="bill-preview" id="billPreview">
+            <div class="bill-row"><span>Subtotal</span><span id="bSubtotal">Rs 0</span></div>
+            <div class="bill-row"><span>Discount</span><span id="bDiscount">- Rs 0</span></div>
+            <div class="bill-row"><span>Tax (5%)</span><span id="bTax">Rs 0</span></div>
+            <div class="bill-row" style="font-weight:800;font-size:15px;margin-top:6px;border-top:1px dashed var(--border);padding-top:8px;"><span>TOTAL</span><span id="bTotal">Rs 0</span></div>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-ghost flex-fill" id="holdBtn"><i class="fa-regular fa-clock me-1"></i>Hold</button>
+            <button class="btn btn-ghost flex-fill" id="clearBtn"><i class="fa-solid fa-eraser me-1"></i>Clear</button>
+            <button class="btn btn-brand flex-fill" id="payBtn" disabled><i class="fa-solid fa-hand-holding-dollar me-1"></i>Pay &amp; Print</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Item picker: variants + add-ons -->
+<div class="modal fade" id="itemModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="imName">Item</h5>
+          <div class="sub" style="font-size:12px;color:var(--text-muted);" id="imDesc"></div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Size / Variant</label>
+        <div id="imVariants"></div>
+        <label class="form-label">Add-ons</label>
+        <div id="imAddons"></div>
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-secondary" style="font-size:12px;">Unit price</div>
+            <div class="fs-5 fw-bold" id="imPrice">Rs 0</div>
+          </div>
+          <div class="qty-group">
+            <button class="qty-btn" id="imMinus"><i class="fa-solid fa-minus"></i></button>
+            <span class="qty-val" id="imQty">1</span>
+            <button class="qty-btn" id="imPlus"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="imAdd"><i class="fa-solid fa-cart-plus me-1"></i>Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment modal -->
+<div class="modal fade" id="payModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Complete Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <div class="text-secondary" style="font-size:12.5px;font-weight:600;">Amount Due</div>
+          <div class="display-6 fw-bold" style="font-size:34px;" id="pmTotal">Rs 0</div>
+        </div>
+        <label class="form-label">Payment Method</label>
+        <div class="row g-2 mb-3">
+          <div class="col-6"><button type="button" class="btn btn-outline-brand w-100 active" data-pm="Cash">Cash</button></div>
+          <div class="col-6"><button type="button" class="btn btn-outline-brand w-100" data-pm="Card">Card</button></div>
+          <div class="col-6"><button type="button" class="btn btn-outline-brand w-100" data-pm="JazzCash">JazzCash</button></div>
+          <div class="col-6"><button type="button" class="btn btn-outline-brand w-100" data-pm="EasyPaisa">EasyPaisa</button></div>
+        </div>
+        <div id="pmCashRow" style="display:none;">
+          <label class="form-label">Cash Received</label>
+          <div class="d-flex gap-2 mb-2 flex-wrap" id="pmQuick">
+            <button class="btn btn-ghost btn-sm" data-amt="500">Rs 500</button>
+            <button class="btn btn-ghost btn-sm" data-amt="1000">Rs 1,000</button>
+            <button class="btn btn-ghost btn-sm" data-amt="2000">Rs 2,000</button>
+            <button class="btn btn-ghost btn-sm" data-amt="5000">Rs 5,000</button>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text">Rs</span>
+            <input type="number" id="pmReceived" class="form-control" placeholder="Enter cash received">
+          </div>
+          <div class="d-flex justify-content-between mt-2 px-1">
+            <span style="font-size:13px;font-weight:600;">Change</span>
+            <span class="fw-bold" id="pmChange" style="font-size:15px;">Rs 0</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="pmConfirm"><i class="fa-solid fa-circle-check me-1"></i>Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body">
+        <div class="es-icon" style="width:58px;height:58px;background:var(--danger-soft);color:var(--danger-dark);margin:0 auto 12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6 class="fw-bold" id="confirmMsg">Are you sure?</h6>
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmYesBtn">Yes, continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+/* ---------------- Cart state ---------------- */
+const cart = { mode: 'Dine-in', table: null, customer: 'Walk-in Customer', items: [], discount: 0 };
+let picker = null; // { item, variant, addons, qty }
+let selPm = 'Cash';
+
+function menuItemById(id) { return DB.menu.find(m => m.id === id); }
+function addonName(id) { const a = DB.addons.find(x => x.id === id); return a ? a.name : ''; }
+
+/* ---------------- Category chips ---------------- */
+function renderCatChips() {
+  const el = document.getElementById('catFilter');
+  DB.categories.forEach(function (c) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'menu-cat-btn';
+    b.dataset.cat = c.name;
+    b.textContent = c.emoji + ' ' + c.name;
+    el.appendChild(b);
+  });
+  el.querySelectorAll('.menu-cat-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      el.querySelectorAll('.menu-cat-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      renderMenu();
+    });
+  });
+}
+
+/* ---------------- Menu grid ---------------- */
+function renderMenu() {
+  const q = (document.getElementById('posSearch').value || '').toLowerCase();
+  const cat = document.querySelector('#catFilter .menu-cat-btn.active').dataset.cat;
+  const list = DB.menu.filter(function (m) {
+    const okCat = cat === 'All' || m.category === cat;
+    const okQ = !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q);
+    return okCat && okQ;
+  });
+  const el = document.getElementById('menuGrid');
+  el.innerHTML = list.map(function (m) {
+    const from = Math.min.apply(null, m.variants.map(v => v.price));
+    const oos = m.status === 'out_of_stock';
+    return '<button type="button" class="menu-item' + (oos ? ' off' : '') + '" onclick="openPicker(' + m.id + ')">' +
+      (oos ? '<span class="stock-flag">Out</span>' : '') +
+      '<span class="item-emoji">' + (m.emoji || '🍽️') + '</span>' +
+      '<div class="item-name">' + esc(m.name) + '</div>' +
+      '<div class="item-cat">' + esc(m.category) + '</div>' +
+      '<div class="item-price">' + (oos ? 'Out of stock' : 'From ' + formatPKR(from)) + '</div>' +
+      '</button>';
+  }).join('');
+}
+
+/* ---------------- Item picker ---------------- */
+function openPicker(id) {
+  const item = menuItemById(id);
+  if (!item) return;
+  if (item.status === 'out_of_stock') { showToast(item.name + ' is out of stock.', 'warning'); return; }
+  picker = { item: item, variant: 0, addons: {}, qty: 1 };
+  document.getElementById('imName').textContent = item.name;
+  document.getElementById('imDesc').textContent = item.desc || '';
+  document.getElementById('imQty').textContent = 1;
+
+  const vEl = document.getElementById('imVariants');
+  vEl.className = 'size-options mb-3';
+  vEl.innerHTML = item.variants.map(function (v, i) {
+    return '<button type="button" class="size-option' + (i === 0 ? ' active' : '') + '" onclick="pickVariant(' + i + ')">' +
+      '<div class="sz-name">' + esc(v.size) + '</div>' +
+      '<div class="sz-price">' + formatPKR(v.price) + '</div></button>';
+  }).join('');
+
+  const aEl = document.getElementById('imAddons');
+  aEl.className = 'addon-options mb-3';
+  const addons = item.addons.map(addonName).filter(Boolean);
+  if (addons.length) {
+    aEl.innerHTML = addons.map(function (name) {
+      const a = DB.addons.find(x => x.name === name);
+      return '<button type="button" class="addon-chip" data-id="' + a.id + '" onclick="pickAddon(' + a.id + ', this)">' +
+        '<i class="fa-solid fa-plus me-1" style="font-size:9px;"></i>' + esc(a.name) + ' (+' + formatPKR(a.price) + ')</button>';
+    }).join('');
+  } else {
+    aEl.innerHTML = '<div class="text-secondary" style="font-size:13px;">No add-ons for this item.</div>';
+  }
+
+  updatePickerPrice();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('itemModal')).show();
+}
+
+function pickVariant(i) {
+  picker.variant = i;
+  document.querySelectorAll('#imVariants .size-option').forEach(function (b, idx) {
+    b.classList.toggle('active', idx === i);
+  });
+  updatePickerPrice();
+}
+
+function pickAddon(id, btn) {
+  btn.classList.toggle('active');
+  picker.addons[id] = btn.classList.contains('active');
+  updatePickerPrice();
+}
+
+function pickerPrice() {
+  const it = picker.item;
+  let p = it.variants[picker.variant].price;
+  Object.keys(picker.addons).forEach(function (id) {
+    if (picker.addons[id]) p += (DB.addons.find(a => a.id === Number(id)) || { price: 0 }).price;
+  });
+  return p;
+}
+
+function updatePickerPrice() {
+  document.getElementById('imPrice').textContent = formatPKR(pickerPrice() * picker.qty);
+  document.getElementById('imQty').textContent = picker.qty;
+}
+
+document.getElementById('imMinus').addEventListener('click', function () {
+  if (picker.qty > 1) { picker.qty--; updatePickerPrice(); }
+});
+document.getElementById('imPlus').addEventListener('click', function () {
+  picker.qty++;
+  updatePickerPrice();
+});
+document.getElementById('imAdd').addEventListener('click', function () {
+  if (!picker) return;
+  const it = picker.item;
+  const v = it.variants[picker.variant];
+  const sel = Object.keys(picker.addons).filter(id => picker.addons[id]).map(Number);
+  const addParts = sel.map(id => DB.addons.find(a => a.id === id).name);
+  const name = it.name + ' (' + v.size + ')' + (addParts.length ? ' + ' + addParts.join(', ') : '');
+  addToCart(name, pickerPrice(), picker.qty);
+  bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide();
+  showToast('Added ' + it.name + ' to order.', 'success');
+});
+
+/* ---------------- Cart ---------------- */
+function addToCart(name, price, qty) {
+  const existing = cart.items.find(i => i.name === name);
+  if (existing) { existing.qty += qty; }
+  else { cart.items.push({ name: name, qty: qty, price: price }); }
+  renderCart();
+}
+
+function renderCart() {
+  const el = document.getElementById('cartItems');
+  const count = cart.items.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartCount').textContent = count + ' item' + (count === 1 ? '' : 's');
+  document.getElementById('payBtn').disabled = count === 0;
+
+  if (!cart.items.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:26px 10px;"><div class="es-icon" style="width:46px;height:46px;font-size:18px;"><i class="fa-regular fa-cart-plus"></i></div><h6>Cart is empty</h6><p>Select items from the menu to start.</p></div>';
+  } else {
+    el.innerHTML = cart.items.map(function (it, i) {
+      return '<div class="cart-item">' +
+        '<div class="cart-info">' +
+        '<div class="cart-name">' + esc(it.name) + '</div>' +
+        '<div class="cart-sub">' + formatPKR(it.price) + ' × ' + it.qty + '</div></div>' +
+        '<div class="cart-price">' + formatPKR(it.price * it.qty) + '</div>' +
+        '<div class="qty-group">' +
+        '<button class="qty-btn" onclick="adjQty(' + i + ',-1)"><i class="fa-solid fa-minus"></i></button>' +
+        '<button class="qty-btn" onclick="adjQty(' + i + ',1)"><i class="fa-solid fa-plus"></i></button>' +
+        '<button class="qty-btn remove" onclick="rmItem(' + i + ')"><i class="fa-solid fa-trash"></i></button>' +
+        '</div></div>';
+    }).join('');
+  }
+  renderBill();
+}
+
+function adjQty(i, d) {
+  cart.items[i].qty += d;
+  if (cart.items[i].qty <= 0) cart.items.splice(i, 1);
+  renderCart();
+}
+
+function rmItem(i) { cart.items.splice(i, 1); renderCart(); }
+
+function cartTotals() {
+  const subtotal = cart.items.reduce((s, i) => s + i.price * i.qty, 0);
+  const discount = Math.min(cart.discount, subtotal);
+  const tax = Math.round((subtotal - discount) * (DB.business.taxRate / 100));
+  return { subtotal, discount, tax, total: subtotal - discount + tax };
+}
+
+function renderBill() {
+  const t = cartTotals();
+  document.getElementById('bSubtotal').textContent = formatPKR(t.subtotal);
+  document.getElementById('bDiscount').textContent = '- ' + formatPKR(t.discount);
+  document.getElementById('bTax').textContent = formatPKR(t.tax);
+  document.getElementById('bTotal').textContent = formatPKR(t.total);
+}
+
+/* ---------------- Mode / table / customer ---------------- */
+document.querySelectorAll('#modeBtns .pos-mode-btn').forEach(function (b) {
+  b.addEventListener('click', function () {
+    cart.mode = b.dataset.mode;
+    document.querySelectorAll('#modeBtns .pos-mode-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    renderTableSelect();
+  });
+});
+
+function renderTableSelect() {
+  const sel = document.getElementById('posTable');
+  sel.innerHTML = '';
+  if (cart.mode === 'Dine-in') {
+    DB.tables.forEach(function (t) {
+      const o = document.createElement('option');
+      o.value = t.id;
+      o.textContent = t.name + (t.order ? ' (Order #' + t.order + ')' : '');
+      sel.appendChild(o);
+    });
+    if (cart.table && DB.tables.find(t => t.id === cart.table)) sel.value = cart.table;
+  } else {
+    const o = document.createElement('option');
+    o.value = cart.mode === 'Delivery' ? 'Delivery' : 'Counter';
+    o.textContent = cart.mode === 'Delivery' ? 'Delivery Area' : 'Counter';
+    sel.appendChild(o);
+  }
+  sel.disabled = cart.mode !== 'Dine-in';
+  sel.onchange = function () { cart.table = sel.value; };
+  cart.table = sel.value;
+}
+
+document.getElementById('posCustomer').innerHTML =
+  '<option>Walk-in Customer</option>' +
+  DB.customers.map(c => '<option>' + esc(c.name) + '</option>').join('');
+document.getElementById('posCustomer').onchange = function () { cart.customer = this.value; };
+
+document.getElementById('posDiscount').addEventListener('input', function () {
+  cart.discount = Math.max(0, Number(this.value) || 0);
+  renderBill();
+});
+
+/* ---------------- Actions ---------------- */
+document.getElementById('clearBtn').addEventListener('click', function () {
+  confirmAction('Clear the whole cart?', function () {
+    cart.items = [];
+    cart.discount = 0;
+    document.getElementById('posDiscount').value = 0;
+    renderCart();
+    showToast('Cart cleared.', 'success');
+  }, 'Clear Cart');
+});
+
+document.getElementById('holdBtn').addEventListener('click', function () {
+  if (!cart.items.length) return;
+  completeOrder('hold', '—');
+  showToast('Order held. You can resume from the Orders page.', 'success');
+});
+
+document.getElementById('payBtn').addEventListener('click', function () {
+  const t = cartTotals();
+  document.getElementById('pmTotal').textContent = formatPKR(t.total);
+  document.getElementById('pmReceived').value = Math.ceil(t.total);
+  document.getElementById('pmChange').textContent = 'Rs 0';
+  renderPayMethod();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('payModal')).show();
+});
+
+function renderPayMethod() {
+  document.querySelectorAll('[data-pm]').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.pm === selPm);
+  });
+  document.getElementById('pmCashRow').style.display = selPm === 'Cash' ? 'block' : 'none';
+  if (selPm === 'Cash') updateChange();
+}
+
+function updateChange() {
+  const t = cartTotals();
+  const rec = Number(document.getElementById('pmReceived').value) || 0;
+  document.getElementById('pmChange').textContent = formatPKR(Math.max(0, rec - t.total));
+}
+
+document.querySelectorAll('[data-pm]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    selPm = b.dataset.pm;
+    renderPayMethod();
+  });
+});
+document.querySelectorAll('#pmQuick [data-amt]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.getElementById('pmReceived').value = Number(b.dataset.amt);
+    updateChange();
+  });
+});
+document.getElementById('pmReceived').addEventListener('input', updateChange);
+
+document.getElementById('pmConfirm').addEventListener('click', function () {
+  const t = cartTotals();
+  const pm = document.getElementById('payModal');
+  bootstrap.Modal.getInstance(pm).hide();
+  const o = completeOrder('pending', selPm);
+  showToast('Payment received — Order #' + o.id + ' completed.', 'success');
+  printInvoice(
+    { id: o.id, date: o.date, time: o.time, type: o.type, customer: o.customer, table: o.table, payment: o.payment },
+    o.items, { subtotal: o.subtotal, discount: o.discount, tax: o.tax, total: o.total }
+  );
+});
+
+/* ---------------- Order completion ---------------- */
+function completeOrder(status, payment) {
+  const t = cartTotals();
+  const id = Math.max.apply(null, DB.orders.map(o => o.id)) + 1;
+  const order = {
+    id: id,
+    type: cart.mode,
+    customer: cart.customer || 'Walk-in Customer',
+    table: cart.table || (cart.mode === 'Delivery' ? 'Delivery' : 'Counter'),
+    time: nowTime(),
+    date: todayStr(),
+    items: cart.items.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+    subtotal: t.subtotal,
+    discount: t.discount,
+    tax: t.tax,
+    total: t.total,
+    payment: payment,
+    status: status
+  };
+  DB.orders.unshift(order);
+
+  if (cart.mode === 'Dine-in' && cart.table) {
+    const tbl = DB.tables.find(x => x.id === cart.table);
+    if (tbl) { tbl.order = id; tbl.status = status === 'hold' ? 'hold' : 'occupied'; }
+  }
+
+  cart.items = [];
+  cart.discount = 0;
+  document.getElementById('posDiscount').value = 0;
+  renderCart();
+  return order;
+}
+
+/* ---------------- Init ---------------- */
+document.addEventListener('DOMContentLoaded', function () {
+  renderCatChips();
+  renderMenu();
+  renderTableSelect();
+  renderCart();
+});
+</script>
+</body>
+</html>

@@ -19,12 +19,11 @@
   <div class="row g-3 mb-3">
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="card kpi-card">
-        <span class="kpi-accent green"></span>
-        <div class="kpi-body" style="padding:14px;">
-          <div class="kpi-icon bg-green-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-icon bg-orange-soft"><i class="fa-solid fa-chart-line"></i></div>
           <div class="flex-grow-1">
             <div class="kpi-label">Today's Sales</div>
-            <div class="kpi-value" style="font-size:20px;" id="kpiSales">Rs 0</div>
+            <div class="kpi-value" id="kpiSales">Rs 0</div>
             <div class="kpi-compare" id="kpiSalesCmp"></div>
           </div>
         </div>
@@ -32,12 +31,11 @@
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="card kpi-card">
-        <span class="kpi-accent blue"></span>
-        <div class="kpi-body" style="padding:14px;">
-          <div class="kpi-icon bg-blue-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-receipt"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-icon bg-blue-soft"><i class="fa-solid fa-receipt"></i></div>
           <div class="flex-grow-1">
             <div class="kpi-label">Orders Today</div>
-            <div class="kpi-value" style="font-size:20px;" id="kpiOrders">0</div>
+            <div class="kpi-value" id="kpiOrders">0</div>
             <div class="kpi-compare" id="kpiOrdersCmp"></div>
           </div>
         </div>
@@ -45,12 +43,11 @@
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="card kpi-card">
-        <span class="kpi-accent red"></span>
-        <div class="kpi-body" style="padding:14px;">
-          <div class="kpi-icon bg-red-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-wallet"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-icon bg-red-soft"><i class="fa-solid fa-wallet"></i></div>
           <div class="flex-grow-1">
             <div class="kpi-label">Today's Expenses</div>
-            <div class="kpi-value" style="font-size:20px;" id="kpiExpenses">Rs 0</div>
+            <div class="kpi-value" id="kpiExpenses">Rs 0</div>
             <div class="kpi-compare" id="kpiExpCmp"></div>
           </div>
         </div>
@@ -58,12 +55,11 @@
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="card kpi-card">
-        <span class="kpi-accent violet"></span>
-        <div class="kpi-body" style="padding:14px;">
-          <div class="kpi-icon bg-violet-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-coins"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-icon bg-green-soft"><i class="fa-solid fa-coins"></i></div>
           <div class="flex-grow-1">
             <div class="kpi-label">Estimated Net Profit</div>
-            <div class="kpi-value" style="font-size:20px;" id="kpiProfit">Rs 0</div>
+            <div class="kpi-value" id="kpiProfit">Rs 0</div>
             <div class="kpi-compare" id="kpiProfitCmp"></div>
           </div>
         </div>
@@ -82,10 +78,10 @@
               <span><span class="dot" style="background:var(--brand)"></span>Sales</span>
               <span><span class="dot" style="background:var(--info)"></span>Orders</span>
             </div>
-            <div class="btn-group btn-group-sm" role="group">
-              <button type="button" class="btn btn-outline-brand active" data-range="today">Today</button>
-              <button type="button" class="btn btn-outline-brand" data-range="week">This Week</button>
-              <button type="button" class="btn btn-outline-brand" data-range="month">This Month</button>
+            <div class="seg-control" role="group">
+              <button type="button" class="btn active" data-range="today">Today</button>
+              <button type="button" class="btn" data-range="week">Week</button>
+              <button type="button" class="btn" data-range="month">Month</button>
             </div>
           </div>
         </div>
