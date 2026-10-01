@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppliers — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="suppliers">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Suppliers</h4>
+      <span class="text-secondary" style="font-size:13px;">Vendors you buy ingredients and supplies from.</span>
+    </div>
+    <div class="actions">
+      <a href="purchases.html" class="btn btn-ghost"><i class="fa-solid fa-cart-shopping me-1"></i>Purchases</a>
+      <button class="btn btn-brand" onclick="openSupModal()"><i class="fa-solid fa-plus me-1"></i>Add Supplier</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="search-box" style="flex:1;min-width:200px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="supSearch" placeholder="Search suppliers..." style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <select class="form-select form-select-sm" id="supCat" style="width:auto;"><option value="All">All Categories</option></select>
+        <select class="form-select form-select-sm" id="supStatus" style="width:auto;">
+          <option value="All">All Status</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row g-3" id="supGrid"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Supplier modal -->
+<div class="modal fade" id="supModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="supModalTitle">Add Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Company / Supplier Name</label>
+            <input type="text" id="sName" class="form-control" placeholder="e.g. Karachi Meat Mart">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Contact Person</label>
+            <input type="text" id="sContact" class="form-control" placeholder="e.g. Abdul Qadir">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Phone</label>
+            <input type="text" id="sPhone" class="form-control" placeholder="e.g. 0300-1112233">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Email</label>
+            <input type="email" id="sEmail" class="form-control" placeholder="e.g. sales@supplier.pk">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Category</label>
+            <select id="sCat" class="form-select">
+              <option>Meat</option><option>Produce</option><option>Dairy</option>
+              <option>Bakery</option><option>Grocery</option><option>Pantry</option>
+              <option>Beverages</option><option>Packaging</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Address</label>
+            <input type="text" id="sAddr" class="form-control" placeholder="e.g. MM Alam Road, Lahore">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Status</label>
+            <select id="sStatus" class="form-select">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="supSave"><i class="fa-solid fa-floppy-disk me-1"></i>Save Supplier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body">
+        <div class="es-icon" style="width:58px;height:58px;background:var(--danger-soft);color:var(--danger-dark);margin:0 auto 12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6 class="fw-bold" id="confirmMsg">Are you sure?</h6>
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmYesBtn">Yes, continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+let editingSup = null;
+
+function fillSupCat() {
+  const cats = [...new Set(DB.suppliers.map(s => s.category))];
+  document.getElementById('supCat').innerHTML = '<option value="All">All Categories</option>' +
+    cats.map(c => '<option>' + esc(c) + '</option>').join('');
+}
+
+function renderSuppliers() {
+  const q = (document.getElementById('supSearch').value || '').toLowerCase();
+  const cat = document.getElementById('supCat').value;
+  const st = document.getElementById('supStatus').value;
+  const list = DB.suppliers.filter(function (s) {
+    const okQ = !q || s.name.toLowerCase().includes(q) || s.phone.includes(q) || (s.contact || '').toLowerCase().includes(q);
+    const okC = cat === 'All' || s.category === cat;
+    const okS = st === 'All' || s.status === st.toLowerCase();
+    return okQ && okC && okS;
+  });
+  const el = document.getElementById('supGrid');
+  if (!list.length) {
+    el.innerHTML = '<div class="col-12"><div class="empty-state"><div class="es-icon"><i class="fa-solid fa-truck-field"></i></div><h6>No suppliers found</h6><p>Add your first supplier to record purchases.</p></div></div>';
+    return;
+  }
+  el.innerHTML = list.map(function (s) {
+    const spent = DB.purchases.filter(p => p.supplier === s.name).reduce((sum, p) => sum + p.amount, 0);
+    return '<div class="col-md-6 col-xxl-4">' +
+      '<div class="card h-100"><div class="card-body">' +
+      '<div class="d-flex align-items-start justify-content-between mb-2">' +
+      '<div class="d-flex align-items-center gap-3">' +
+      '<span class="rank-chip" style="width:42px;height:42px;font-size:17px;background:var(--brand-soft);color:var(--brand-dark);"><i class="fa-solid fa-truck-field"></i></span>' +
+      '<div><div class="cell-fw" style="font-size:14px;">' + esc(s.name) + '</div>' +
+      '<div class="text-secondary" style="font-size:12px;">' + esc(s.category) + ' · ' + statusBadge(s.status) + '</div></div></div>' +
+      '<div class="d-flex gap-1">' +
+      '<button class="btn btn-ghost btn-sm" onclick="openSupModal(' + s.id + ')"><i class="fa-regular fa-pen-to-square"></i></button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="delSup(' + s.id + ')"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></div>' +
+      '<div class="row g-2 text-secondary" style="font-size:12.5px;">' +
+      '<div class="col-6"><i class="fa-solid fa-user me-1"></i>' + esc(s.contact || '—') + '</div>' +
+      '<div class="col-6"><i class="fa-solid fa-phone me-1"></i>' + esc(s.phone) + '</div>' +
+      '<div class="col-6"><i class="fa-solid fa-envelope me-1"></i>' + esc(s.email || '—') + '</div>' +
+      '<div class="col-6"><i class="fa-solid fa-location-dot me-1"></i>' + esc(s.address || '—') + '</div>' +
+      '</div>' +
+      '<div class="d-flex justify-content-between mt-3 pt-2" style="border-top:1px dashed var(--border);">' +
+      '<span style="font-size:12px;font-weight:600;">Total purchases</span>' +
+      '<b style="font-size:13px;">' + formatPKR(spent) + '</b></div>' +
+      '</div></div></div>';
+  }).join('');
+}
+
+function openSupModal(id) {
+  editingSup = id ? DB.suppliers.find(s => s.id === id) : null;
+  document.getElementById('supModalTitle').textContent = editingSup ? 'Edit Supplier' : 'Add Supplier';
+  document.getElementById('sName').value = editingSup ? editingSup.name : '';
+  document.getElementById('sContact').value = editingSup ? (editingSup.contact || '') : '';
+  document.getElementById('sPhone').value = editingSup ? editingSup.phone : '';
+  document.getElementById('sEmail').value = editingSup ? (editingSup.email || '') : '';
+  document.getElementById('sCat').value = editingSup ? editingSup.category : 'Meat';
+  document.getElementById('sAddr').value = editingSup ? (editingSup.address || '') : '';
+  document.getElementById('sStatus').value = editingSup ? editingSup.status : 'active';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('supModal')).show();
+}
+
+document.getElementById('supSave').addEventListener('click', function () {
+  const name = document.getElementById('sName').value.trim();
+  if (!name) { showToast('Supplier name is required.', 'danger'); return; }
+  const data = {
+    name: name,
+    contact: document.getElementById('sContact').value.trim(),
+    phone: document.getElementById('sPhone').value.trim(),
+    email: document.getElementById('sEmail').value.trim(),
+    category: document.getElementById('sCat').value,
+    address: document.getElementById('sAddr').value.trim(),
+    status: document.getElementById('sStatus').value
+  };
+  if (editingSup) {
+    Object.assign(editingSup, data);
+    showToast('Supplier updated.', 'success');
+  } else {
+    DB.suppliers.push({ id: Math.max.apply(null, DB.suppliers.map(s => s.id)) + 1, ...data });
+    showToast('Supplier added.', 'success');
+  }
+  bootstrap.Modal.getInstance(document.getElementById('supModal')).hide();
+  renderSuppliers();
+});
+
+function delSup(id) {
+  const s = DB.suppliers.find(x => x.id === id);
+  confirmAction('Delete supplier <b>' + esc(s.name) + '</b>?', function () {
+    DB.suppliers = DB.suppliers.filter(x => x.id !== id);
+    showToast('Supplier deleted.', 'success');
+    renderSuppliers();
+  }, 'Delete');
+}
+
+document.getElementById('supSearch').addEventListener('keyup', renderSuppliers);
+document.getElementById('supCat').addEventListener('change', renderSuppliers);
+document.getElementById('supStatus').addEventListener('change', renderSuppliers);
+
+document.addEventListener('DOMContentLoaded', function () {
+  fillSupCat();
+  renderSuppliers();
+});
+</script>
+</body>
+</html>

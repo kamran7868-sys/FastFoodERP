@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="settings-users">
+
+<main class="main-content">
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Users &amp; Roles</h4>
+      <span class="text-secondary" style="font-size:13px;">Staff accounts and their access permissions.</span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-brand" onclick="openUserModal()"><i class="fa-solid fa-plus me-1"></i>Add User</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="search-box" style="flex:1;min-width:200px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="userSearch" placeholder="Search by name, username or role..." style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <select class="form-select form-select-sm" id="roleFilter" style="width:auto;">
+          <option value="All">All Roles</option>
+          <option>Owner</option>
+          <option>Manager</option>
+          <option>Cashier</option>
+          <option>Waiter</option>
+          <option>Chef</option>
+        </select>
+        <select class="form-select form-select-sm" id="userStatus" style="width:auto;">
+          <option value="All">All Status</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Permission</th>
+            <th style="width:110px;">Status</th>
+            <th class="text-end" style="width:130px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- User modal -->
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalTitle">Add User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="uName" class="form-control" placeholder="e.g. Ali Hassan">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Username</label>
+            <input type="text" id="uUser" class="form-control" placeholder="e.g. ali">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Email</label>
+            <input type="email" id="uEmail" class="form-control" placeholder="e.g. ali@biryanibits.pk">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Role</label>
+            <select id="uRole" class="form-select">
+              <option>Owner</option><option>Manager</option><option>Cashier</option><option>Waiter</option><option>Chef</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Status</label>
+            <select id="uStatus" class="form-select">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Permission</label>
+            <select id="uPerm" class="form-select">
+              <option>Full access</option>
+              <option>All except settings</option>
+              <option>POS, orders, customers</option>
+              <option>POS, tables, orders</option>
+              <option>Menu, recipes, stock</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-brand" id="userSave"><i class="fa-solid fa-floppy-disk me-1"></i>Save User</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body">
+        <div class="es-icon" style="width:58px;height:58px;background:var(--danger-soft);color:var(--danger-dark);margin:0 auto 12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6 class="fw-bold" id="confirmMsg">Are you sure?</h6>
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmYesBtn">Yes, continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+let editingUser = null;
+
+function renderUsers() {
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+  const role = document.getElementById('roleFilter').value;
+  const st = document.getElementById('userStatus').value;
+  const list = DB.users.filter(function (u) {
+    const okQ = !q || u.name.toLowerCase().includes(q) || u.username.toLowerCase().includes(q) || u.role.toLowerCase().includes(q);
+    const okR = role === 'All' || u.role === role;
+    const okS = st === 'All' || u.status === st.toLowerCase();
+    return okQ && okR && okS;
+  });
+  const el = document.getElementById('userBody');
+  if (!list.length) {
+    el.innerHTML = emptyRow(7, 'No users found', 'Add staff accounts to control access.');
+    return;
+  }
+  const roleColors = { Owner: 'badge-completed', Manager: 'badge-preparing', Cashier: 'badge-pending', Waiter: 'badge-delivery', Chef: 'badge-inactive' };
+  el.innerHTML = list.map(function (u) {
+    return '<tr>' +
+      '<td><div class="d-flex align-items-center gap-2">' +
+      '<span class="avatar" style="width:34px;height:34px;background:var(--bg);color:var(--text);font-size:12px;">' + esc(u.name.split(' ').map(w => w[0]).slice(0, 2).join('')) + '</span>' +
+      '<span class="cell-fw">' + esc(u.name) + '</span></div></td>' +
+      '<td>' + esc(u.username) + '</td>' +
+      '<td style="font-size:12.5px;">' + esc(u.email) + '</td>' +
+      '<td><span class="badge ' + (roleColors[u.role] || 'badge-inactive') + '">' + esc(u.role) + '</span></td>' +
+      '<td style="font-size:12.5px;">' + esc(u.permission) + '</td>' +
+      '<td>' + statusBadge(u.status) + '</td>' +
+      '<td class="text-end"><div class="d-inline-flex gap-1">' +
+      '<button class="btn btn-ghost btn-sm" onclick="openUserModal(' + u.id + ')"><i class="fa-regular fa-pen-to-square"></i></button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="delUser(' + u.id + ')"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+function openUserModal(id) {
+  editingUser = id ? DB.users.find(u => u.id === id) : null;
+  document.getElementById('userModalTitle').textContent = editingUser ? 'Edit User' : 'Add User';
+  document.getElementById('uName').value = editingUser ? editingUser.name : '';
+  document.getElementById('uUser').value = editingUser ? editingUser.username : '';
+  document.getElementById('uEmail').value = editingUser ? editingUser.email : '';
+  document.getElementById('uRole').value = editingUser ? editingUser.role : 'Cashier';
+  document.getElementById('uStatus').value = editingUser ? editingUser.status : 'active';
+  document.getElementById('uPerm').value = editingUser ? editingUser.permission : 'POS, orders, customers';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('userModal')).show();
+}
+
+document.getElementById('userSave').addEventListener('click', function () {
+  const name = document.getElementById('uName').value.trim();
+  const username = document.getElementById('uUser').value.trim();
+  if (!name || !username) { showToast('Name and username are required.', 'danger'); return; }
+  const data = {
+    name: name,
+    username: username,
+    email: document.getElementById('uEmail').value.trim(),
+    role: document.getElementById('uRole').value,
+    status: document.getElementById('uStatus').value,
+    permission: document.getElementById('uPerm').value
+  };
+  if (editingUser) {
+    Object.assign(editingUser, data);
+    showToast('User updated.', 'success');
+  } else {
+    DB.users.push({ id: Math.max.apply(null, DB.users.map(u => u.id)) + 1, ...data });
+    showToast('User added.', 'success');
+  }
+  bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+  renderUsers();
+});
+
+function delUser(id) {
+  const u = DB.users.find(x => x.id === id);
+  confirmAction('Delete user <b>' + esc(u.name) + '</b>?', function () {
+    DB.users = DB.users.filter(x => x.id !== id);
+    showToast('User deleted.', 'success');
+    renderUsers();
+  }, 'Delete');
+}
+
+document.getElementById('userSearch').addEventListener('keyup', renderUsers);
+document.getElementById('roleFilter').addEventListener('change', renderUsers);
+document.getElementById('userStatus').addEventListener('change', renderUsers);
+
+document.addEventListener('DOMContentLoaded', renderUsers);
+</script>
+</body>
+</html>

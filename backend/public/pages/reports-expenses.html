@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Report — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="reports-expenses" class="report-print">
+
+<main class="main-content">
+
+  <div class="print-report-head">
+    <div class="prh-brand">BITEFLOW</div>
+    <div class="prh-title">Expense Report</div>
+    <div class="prh-meta">Generated: <span class="print-date">—</span></div>
+  </div>
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Expense Report</h4>
+      <span class="text-secondary" style="font-size:13px;">Where the money goes — by category and payment method.</span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="window.print()"><i class="fa-solid fa-print me-1"></i>Print Report</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent red"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-red-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-coins"></i></div>
+          <div><div class="kpi-label">Total Expenses</div><div class="kpi-value" style="font-size:20px;" id="eTotal">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent amber"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-amber-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-house-chimney"></i></div>
+          <div><div class="kpi-label">Rent</div><div class="kpi-value" style="font-size:20px;" id="eRent">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent blue"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-blue-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-bolt"></i></div>
+          <div><div class="kpi-label">Utilities</div><div class="kpi-value" style="font-size:20px;" id="eUtil">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent violet"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-violet-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-shop"></i></div>
+          <div><div class="kpi-label">Other</div><div class="kpi-value" style="font-size:20px;" id="eOther">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header"><span>Expenses by Category</span></div>
+        <div class="card-body"><div class="bar-chart" id="catChart"></div></div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header"><span>Payment Methods</span></div>
+        <div class="card-body" id="methodBreak"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-header"><span>Category Summary</span></div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr><th>Category</th><th class="text-center">Entries</th><th class="text-end">Total</th><th class="text-end">Share</th></tr>
+        </thead>
+        <tbody id="catBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+function renderExpenseReport() {
+  const total = DB.expenses.reduce((s, e) => s + e.amount, 0);
+  document.getElementById('eTotal').textContent = formatPKR(total);
+  document.getElementById('eRent').textContent = formatPKR(DB.expenses.filter(e => e.category === 'Rent').reduce((s, e) => s + e.amount, 0));
+  document.getElementById('eUtil').textContent = formatPKR(DB.expenses.filter(e => e.category === 'Utilities').reduce((s, e) => s + e.amount, 0));
+  document.getElementById('eOther').textContent = formatPKR(DB.expenses.filter(e => e.category !== 'Rent' && e.category !== 'Utilities').reduce((s, e) => s + e.amount, 0));
+
+  const byCat = {};
+  const byMethod = {};
+  DB.expenses.forEach(function (e) {
+    byCat[e.category] = (byCat[e.category] || 0) + e.amount;
+    byMethod[e.method] = (byMethod[e.method] || 0) + e.amount;
+  });
+
+  const cats = Object.keys(byCat);
+  const maxAmt = Math.max(1, ...cats.map(c => byCat[c]));
+  barChart('catChart', cats.map(function (c) {
+    return { label: c.slice(0, 6), bars: [{ h: Math.round((byCat[c] / maxAmt) * 100), title: c + ': ' + formatPKR(byCat[c]) }] };
+  }));
+
+  const methods = Object.keys(byMethod);
+  const mMax = Math.max(1, ...methods.map(m => byMethod[m]));
+  document.getElementById('methodBreak').innerHTML = methods.map(function (m) {
+    const amt = byMethod[m];
+    return '<div class="bs-item">' +
+      '<span class="rank-chip" style="background:var(--bg);"><i class="fa-solid fa-wallet"></i></span>' +
+      '<div class="bs-meta"><div class="d-flex justify-content-between"><span class="bs-name">' + esc(m) + '</span>' +
+      '<span class="bs-amt">' + formatPKR(amt) + '</span></div>' +
+      '<div class="progress mt-1"><div class="progress-bar" style="width:' + Math.round((amt / mMax) * 100) + '%"></div></div>' +
+      '<div class="bs-sub">' + Math.round((amt / total) * 100) + '% of total</div></div></div>';
+  }).join('');
+
+  const body = document.getElementById('catBody');
+  if (!cats.length) {
+    body.innerHTML = emptyRow(4, 'No expenses recorded', 'Expense data will appear here.');
+    return;
+  }
+  body.innerHTML = cats.map(function (c) {
+    const amt = byCat[c];
+    const count = DB.expenses.filter(e => e.category === c).length;
+    return '<tr><td class="cell-fw">' + esc(c) + '</td>' +
+      '<td class="text-center">' + count + '</td>' +
+      '<td class="text-end cell-fw">' + formatPKR(amt) + '</td>' +
+      '<td class="text-end"><div class="d-flex align-items-center justify-content-end gap-2"><div class="progress" style="width:70px;"><div class="progress-bar" style="width:' + Math.round((amt / total) * 100) + '%"></div></div><b>' + Math.round((amt / total) * 100) + '%</b></div></td></tr>';
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', renderExpenseReport);
+</script>
+</body>
+</html>

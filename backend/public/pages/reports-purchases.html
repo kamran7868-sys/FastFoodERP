@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Report — BiteFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body data-page="reports-purchases" class="report-print">
+
+<main class="main-content">
+
+  <div class="print-report-head">
+    <div class="prh-brand">BITEFLOW</div>
+    <div class="prh-title">Purchase Report</div>
+    <div class="prh-meta">Generated: <span class="print-date">—</span></div>
+  </div>
+
+  <div class="page-head">
+    <div>
+      <h4 style="font-weight:800;margin-bottom:2px;">Purchase Report</h4>
+      <span class="text-secondary" style="font-size:13px;">Spend by supplier and payment status.</span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="window.print()"><i class="fa-solid fa-print me-1"></i>Print Report</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent blue"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-blue-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <div><div class="kpi-label">Total Purchases</div><div class="kpi-value" style="font-size:20px;" id="pTotal">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent green"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-green-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-circle-check"></i></div>
+          <div><div class="kpi-label">Paid</div><div class="kpi-value" style="font-size:20px;" id="pPaid">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent amber"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-amber-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-regular fa-clock"></i></div>
+          <div><div class="kpi-label">Pending</div><div class="kpi-value" style="font-size:20px;" id="pPending">Rs 0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card kpi-card"><span class="kpi-accent violet"></span>
+        <div class="kpi-body" style="padding:14px;">
+          <div class="kpi-icon bg-violet-soft" style="width:42px;height:42px;font-size:16px;"><i class="fa-solid fa-truck-field"></i></div>
+          <div><div class="kpi-label">Active Suppliers</div><div class="kpi-value" style="font-size:20px;" id="pSupp">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header"><span>Purchases by Supplier</span></div>
+        <div class="card-body"><div class="bar-chart" id="supChart"></div></div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header"><span>Payment Split</span></div>
+        <div class="card-body" id="paySplit"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-header"><span>Supplier Summary</span></div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr><th>Supplier</th><th class="text-center">Orders</th><th class="text-end">Total</th><th class="text-end">Paid</th><th class="text-end">Pending</th></tr>
+        </thead>
+        <tbody id="supBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/components.js"></script>
+<script>
+function renderPurchaseReport() {
+  const total = DB.purchases.reduce((s, p) => s + p.amount, 0);
+  const paid = DB.purchases.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
+  document.getElementById('pTotal').textContent = formatPKR(total);
+  document.getElementById('pPaid').textContent = formatPKR(paid);
+  document.getElementById('pPending').textContent = formatPKR(total - paid);
+  document.getElementById('pSupp').textContent = new Set(DB.purchases.map(p => p.supplier)).size;
+
+  const bySup = {};
+  DB.purchases.forEach(p => {
+    bySup[p.supplier] = bySup[p.supplier] || { count: 0, total: 0, paid: 0 };
+    bySup[p.supplier].count++;
+    bySup[p.supplier].total += p.amount;
+    if (p.status === 'paid') bySup[p.supplier].paid += p.amount;
+  });
+  const sups = Object.keys(bySup);
+  const maxAmt = Math.max(1, ...sups.map(s => bySup[s].total));
+  barChart('supChart', sups.map(function (s) {
+    return { label: s.split(' ')[0], bars: [{ h: Math.round((bySup[s].total / maxAmt) * 100), title: s + ': ' + formatPKR(bySup[s].total) }] };
+  }));
+
+  const paidPct = total ? Math.round((paid / total) * 100) : 0;
+  document.getElementById('paySplit').innerHTML =
+    '<div class="bs-item"><span class="rank-chip" style="background:var(--success-soft);color:var(--success-dark);"><i class="fa-solid fa-circle-check"></i></span>' +
+    '<div class="bs-meta"><div class="d-flex justify-content-between"><span class="bs-name">Paid</span><span class="bs-amt">' + formatPKR(paid) + '</span></div>' +
+    '<div class="progress mt-1"><div class="progress-bar bg-success" style="width:' + paidPct + '%"></div></div></div></div>' +
+    '<div class="bs-item"><span class="rank-chip" style="background:var(--warning-soft);color:#a16207;"><i class="fa-regular fa-clock"></i></span>' +
+    '<div class="bs-meta"><div class="d-flex justify-content-between"><span class="bs-name">Pending</span><span class="bs-amt">' + formatPKR(total - paid) + '</span></div>' +
+    '<div class="progress mt-1"><div class="progress-bar bg-warning" style="width:' + (100 - paidPct) + '%"></div></div></div></div>';
+
+  const body = document.getElementById('supBody');
+  if (!sups.length) {
+    body.innerHTML = emptyRow(5, 'No purchases recorded', 'Supplier data will appear here.');
+    return;
+  }
+  body.innerHTML = sups.map(function (s) {
+    const d = bySup[s];
+    return '<tr><td class="cell-fw">' + esc(s) + '</td>' +
+      '<td class="text-center">' + d.count + '</td>' +
+      '<td class="text-end cell-fw">' + formatPKR(d.total) + '</td>' +
+      '<td class="text-end text-success fw-bold">' + formatPKR(d.paid) + '</td>' +
+      '<td class="text-end text-danger fw-bold">' + formatPKR(d.total - d.paid) + '</td></tr>';
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', renderPurchaseReport);
+</script>
+</body>
+</html>
